@@ -249,6 +249,16 @@ git checkout -b master FETCH_HEAD
 
 **验收**：设备上安装后名称/图标为 Prixiv View，P0 全部功能回归通过；`git log` 可见上游基线 + 换牌提交。
 
+**P1 执行记录（2026-11-21 已完成，换牌提交 a44d391）**：
+
+- **用户决策**：bundleName `com.prixiv.view`；显示名 **PixHarbor**（候选中选定）；图标自制「叠影 P」（两轮候选 + 背景色对比后选定 6 号图案）；**桌面主图标固定 8 号 Pixiv 蓝，应用内明暗自动切换**（浅=9 号融合增强白底饱和版 / 深=8 号）；P3 首项=历史排行。
+- **git 基线**：`.git` 复制法导入上游 v1.2.0（ae6d6a3），remote `upstream` 保留（本地 fetch 被沙箱 named-pipe 限制阻断，故用复制法）。
+- **换牌执行**：清单 9 项全部完成，另加：存储键名 `pixlume_*`→`pixharbor_*`（EntryAbility/WidgetService）、导出文件名前缀 `PixHarbor_`（AppDataViewModel）、`AppConstants` 仓库/更新检查链接→`lizheming/PixHarbor`（**远程仓库待创建**，创建前检查更新友好失败）、CHANGELOG fork 头 + 0.1.0 条目、关于页新增上游 PixLume 致谢条目、vendor=prixiv、versionCode 1000000 / versionName 0.1.0。
+- **图标资源落位**：AppScope 与 entry 的分层 base=8 拆分（background 全幅渐变 + foreground 透明安全区，桌面固定不随明暗变）；entry base 的 `app_icon/app_icon_round/startIcon`=9、entry **dark** 同名=8（splash `FOLLOW_SYSTEM`、Index/Login/About logo 自动明暗切换）；`assets/app_icon.png`(8)/`app_icon_light.png`(9) 供 README；原图标备份 `*.orig`（已忽略）；生成/应用脚本在 `tools/icon-gen/`。
+- **.gitignore**：解除 `/docs/`、`/NOTICE.md` 忽略；新增 `/reference/`、`/tools/icon-gen/*.png`、`*.orig`、`__pycache__/`。
+- **残留扫描**：功能性标识零 `pixlume` 残留；剩余命中均为上游归属（CHANGELOG 上游历史、README/NOTICE 致谢、关于页致谢条目），符合 GPL 合规要求。
+- **待 P0 验收**：bundleName 已变更 → DevEco 需重新生成自动签名并 Run；设备上确认名称 PixHarbor、桌面蓝色叠影 P 图标、应用内明暗切换效果。
+
 ### P2：性能优化（2~4 天，推荐做，是你选方案3的核心收益）
 
 | 优化项 | 现状（实测） | 改法 | 预期收益 |
