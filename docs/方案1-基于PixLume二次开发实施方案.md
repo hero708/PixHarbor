@@ -253,7 +253,7 @@ git checkout -b master FETCH_HEAD
 
 - **用户决策**：bundleName `com.prixiv.view`；显示名 **PixHarbor**（候选中选定）；图标自制「叠影 P」（两轮候选 + 背景色对比后选定 6 号图案）；**桌面主图标固定 8 号 Pixiv 蓝，应用内明暗自动切换**（浅=9 号融合增强白底饱和版 / 深=8 号）；P3 首项=历史排行。
 - **git 基线**：`.git` 复制法导入上游 v1.2.0（ae6d6a3），remote `upstream` 保留（本地 fetch 被沙箱 named-pipe 限制阻断，故用复制法）。
-- **换牌执行**：清单 9 项全部完成，另加：存储键名 `pixlume_*`→`pixharbor_*`（EntryAbility/WidgetService）、导出文件名前缀 `PixHarbor_`（AppDataViewModel）、`AppConstants` 仓库/更新检查链接→`hero708/PixHarbor`（**远程仓库已创建**：https://github.com/hero708/PixHarbor ，公开；gh 登录账号为 hero708，故弃用最初猜测的 lizheming 命名空间）、CHANGELOG fork 头 + 0.1.0 条目、关于页新增上游 PixLume 致谢条目、vendor=prixiv、versionCode 1000000 / versionName 0.1.0。
+- **换牌执行**：清单 9 项全部完成，另加：存储键名 `pixlume_*`→`pixharbor_*`（EntryAbility/WidgetService）、导出文件名前缀 `PixHarbor_`（AppDataViewModel）、`AppConstants` 仓库/更新检查链接→`hero708/PixHarbor`（**远程仓库已创建**：https://github.com/hero708/PixHarbor ，公开；gh 登录账号为 hero708，故弃用最初猜测的 lizheming 命名空间）；已推送 `origin/master`（含 `--unshallow` 补全的上游完整历史），应用内检查更新链接生效。推送凭据用 `gh auth git-credential` 助手（需提权：沙箱禁命名管道）；`!gh` shell 助手与 `$t=gh auth token` 捕获在 workspace-write 下均失败（msys signal pipe / dotnet pipe）。、CHANGELOG fork 头 + 0.1.0 条目、关于页新增上游 PixLume 致谢条目、vendor=prixiv、versionCode 1000000 / versionName 0.1.0。
 - **图标资源落位**：AppScope 与 entry 的分层 base=8 拆分（background 全幅渐变 + foreground 透明安全区，桌面固定不随明暗变）；entry base 的 `app_icon/app_icon_round/startIcon`=9、entry **dark** 同名=8（splash `FOLLOW_SYSTEM`、Index/Login/About logo 自动明暗切换）；`assets/app_icon.png`(8)/`app_icon_light.png`(9) 供 README；原图标备份 `*.orig`（已忽略）；生成/应用脚本在 `tools/icon-gen/`。
 - **.gitignore**：解除 `/docs/`、`/NOTICE.md` 忽略；新增 `/reference/`、`/tools/icon-gen/*.png`、`*.orig`、`__pycache__/`。
 - **残留扫描**：功能性标识零 `pixlume` 残留；剩余命中均为上游归属（CHANGELOG 上游历史、README/NOTICE 致谢、关于页致谢条目），符合 GPL 合规要求。
