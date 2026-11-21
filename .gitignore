@@ -35,6 +35,12 @@ desktop.ini
 # ===== 本地打包产物 =====
 /dist
 
-# ===== 开发阶段文档（仅本地，禁止上传）=====
-/NOTICE.md
-/docs/
+# ===== PixHarbor fork 补充 =====
+# 上游参考克隆（仅本地参考，不入库）
+/reference/
+# 图标生成中间产物（脚本入库，候选图不入库）
+/tools/icon-gen/*.png
+# 换牌前原图标备份
+*.orig
+# Python 缓存
+__pycache__/

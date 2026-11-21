@@ -2,15 +2,15 @@
   "string": [
     {
       "name": "module_desc",
-      "value": "module description"
+      "value": "PixHarbor 主模块"
     },
     {
       "name": "EntryAbility_desc",
-      "value": "description"
+      "value": "PixHarbor 主界面"
     },
     {
       "name": "EntryAbility_label",
-      "value": "PixLume"
+      "value": "PixHarbor"
     },
     {
       "name": "permission_reason_INTERNET",
@@ -1058,7 +1058,7 @@
     },
     {
       "name": "PixCardFormAbility_desc",
-      "value": "PixLume 桌面卡片"
+      "value": "PixHarbor 桌面卡片"
     },
     {
       "name": "widget_display_name",

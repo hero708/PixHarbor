@@ -16,7 +16,7 @@ import { createLogger } from '../Logger';
 
 const logger = createLogger('WidgetService')
 
-const WIDGET_PREF_FILE = 'pixlume_widget'
+const WIDGET_PREF_FILE = 'pixharbor_widget'
 const IMAGE_DIR = 'widget'
 // 列表缓存有效期：命中后单次刷新只剩一次小图下载，5 秒生命窗内更稳
 const LIST_CACHE_TTL_MS = 60 * 60 * 1000
@@ -101,8 +101,8 @@ export class WidgetService {
   }
 
   private async doInitRuntime(context: common.Context): Promise<void> {
-    await preferenceUtil.init(context, 'pixlume_preference')
-    await kvDbUtil.initKVManager(context, 'pixlume')
+    await preferenceUtil.init(context, 'pixharbor_preference')
+    await kvDbUtil.initKVManager(context, 'pixharbor')
     // 屏蔽词过滤依赖（PixivData.fetchListWithFilter 内部会 await ready）
     tagCollectionService.init(context)
     await appSettings.load()

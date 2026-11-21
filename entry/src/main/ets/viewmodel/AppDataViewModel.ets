@@ -123,7 +123,7 @@ export class AppDataViewModel {
   // 浏览历史
   async exportIllustHistory() {
     const data = await this.illustHistoryDB.queryAllByAccessTimeDesc();
-    await this.saveFile({ illustHistory: data } as Partial<ImportDataStructure>, `PixLume_浏览历史_${this.getDateStr()}.json`);
+    await this.saveFile({ illustHistory: data } as Partial<ImportDataStructure>, `PixHarbor_浏览历史_${this.getDateStr()}.json`);
   }
 
   async importIllustHistory() {
@@ -156,7 +156,7 @@ export class AppDataViewModel {
   // 搜索记录
   async exportSearchHistory() {
     const data = await this.searchHistoryDB.queryAll();
-    await this.saveFile({ searchHistory: data } as Partial<ImportDataStructure>, `PixLume_搜索记录_${this.getDateStr()}.json`);
+    await this.saveFile({ searchHistory: data } as Partial<ImportDataStructure>, `PixHarbor_搜索记录_${this.getDateStr()}.json`);
   }
 
   async importSearchHistory() {
@@ -195,7 +195,7 @@ export class AppDataViewModel {
   // 下载记录
   async exportDownloadRecords() {
     const data = await this.downloadRecordDB.queryAllDesc();
-    await this.saveFile({ downloadRecords: data } as Partial<ImportDataStructure>, `PixLume_下载记录_${this.getDateStr()}.json`);
+    await this.saveFile({ downloadRecords: data } as Partial<ImportDataStructure>, `PixHarbor_下载记录_${this.getDateStr()}.json`);
   }
 
   async importDownloadRecords() {
@@ -238,7 +238,7 @@ export class AppDataViewModel {
       item.createTime = r.createTime;
       return item;
     });
-    await this.saveFile({ keywords: data } as Partial<ImportDataStructure>, `PixLume_关键词数据_${this.getDateStr()}.json`);
+    await this.saveFile({ keywords: data } as Partial<ImportDataStructure>, `PixHarbor_关键词数据_${this.getDateStr()}.json`);
   }
 
   async importKeywords() {
@@ -253,7 +253,7 @@ export class AppDataViewModel {
 
   // 偏好设置
   async exportSettings() {
-    await this.saveFile({ settings: appSettings } as Partial<ImportDataStructure>, `PixLume_偏好设置_${this.getDateStr()}.json`);
+    await this.saveFile({ settings: appSettings } as Partial<ImportDataStructure>, `PixHarbor_偏好设置_${this.getDateStr()}.json`);
   }
 
   async importSettings() {

@@ -1,119 +1,93 @@
 <div align="center">
 
-# PixLume
+# PixHarbor
 
-> 一款为 HarmonyOS 开发的原生轻量级 Pixiv 第三方客户端
+> 为 HarmonyOS 打造的原生轻量级 Pixiv 第三方客户端 · 把灵感停泊在掌心
 
 ![HarmonyOS](https://img.shields.io/badge/HarmonyOS-ArkTS-green)
 ![API](https://img.shields.io/badge/API-24%2B-blue)
-[![Release](https://img.shields.io/github/v/release/SYTKILLER/PixLume?logo=github)](https://github.com/SYTKILLER/PixLume/releases/latest)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
+<img src="assets/app_icon.png" alt="PixHarbor Icon" width="120">
 
 </div>
 
 ## ✨ 项目简介
 
-PixLume 旨在为鸿蒙用户提供原生流畅的插画与小说浏览体验。它基于 ArkTS / TypeScript 开发，深度整合了 HarmonyOS 的系统能力与 UI 特性，通过 API 模块实现了账号登录、推荐浏览、搜索发现与用户互动等完整功能。
+PixHarbor 基于上游开源项目 [SYTKILLER/PixLume](https://github.com/SYTKILLER/PixLume) v1.2.0（GPL-3.0）二次开发：
+全新品牌与自制图标，并在此基础上持续演进性能与功能（实施计划见 [docs/](docs/)）。
+它基于 ArkTS / TypeScript 开发，深度整合 HarmonyOS 系统能力，提供账号登录、推荐浏览、搜索发现与用户互动等完整功能。
 
 ## 🚀 核心功能
 
-- **🔐 登录**
-    - 支持账号密码与 Refresh Token 双重登录方式（请确保能够正确访问 Pixiv）。
-    - 内置智能 Token 刷新机制，无需频繁重新登录，保持长期在线状态。
-- **🎨 探索与发现**
-    - **推荐流**：根据个人喜好智能推荐插画与漫画。
-    - **排行榜**：一键浏览日榜、周榜、月榜。
-    - **搜索**：支持关键词、标签精准搜索与多图作品识别；「猜你喜欢」从你的收藏标签中随机推荐灵感。
-- **🖼️ 沉浸式浏览**
-    - 插画与小说双形态内容，均支持沉浸式阅读与暗色模式。
-    - **GIF 动图**：详情页原生播放动图，下载自动转码为 GIF 保存至相册。
-    - 支持大图预览、手势操作与原图下载。
-- **⚡ 直连模式**
-    - 网络受限环境下的可选直连链路：启动时自动探测，普通网络不可用时自动切换，接口 / 图片 / 下载三链路全覆盖。
-- **❤️ 用户互动**
-    - **收藏管理**：支持公开/私密收藏，自定义标签，信息流内直接显示收藏状态。
-    - **关注画师**：支持公开/私密关注，实时跟进喜欢的作者。
-- **🗂 本地管理**
-    - **下载管理**：集中管理下载任务与已下载作品，GIF 作品独立标识，支持再次保存。
-    - **小说保存**：小说支持保存 TXT 至本地，可随时再次导出。
-    - **历史记录**：随手回顾看过的插画与小说。
-- **🧰 关键词工具**
-    - 标签关键词自动显示译文，支持本地收藏 / 屏蔽与统一管理。
-- **📱 体验优化**
-    - **智感握姿**：悬浮操作按钮随左右手握持自动换边，单手更顺手。
-    - 底部悬浮页签、沉浸式设计。
+- **🔐 登录**：账号密码 / Refresh Token / Web OAuth 三种方式，Token 自动刷新长期在线
+- **🎨 探索**：推荐流、日/周/月排行榜、关键词搜索与智能补全、「猜你喜欢」
+- **🖼 浏览**：插画/漫画/小说三形态，沉浸式阅读与暗色模式；动图原生播放、下载自动转 GIF 存相册
+- **⚡ 直连模式**：启动自动探测（auto/off/on 三档），普通网络不可用时自动切换直连链路，接口/图片/下载全覆盖；可与 VPN 共存兜底
+- **❤️ 互动**：公开/私密收藏与自定义标签、关注画师
+- **🗂 本地**：下载管理、小说 TXT 导出、历史记录、关键词译文/收藏/屏蔽、数据备份与导入导出
+- **📱 体验**：桌面卡片「灵感图卡」、智感握姿悬浮按钮换边、底部悬浮页签
 
-## 🎨 视觉设计
+## 🎨 图标
+
+自制「叠影 P」设计（生成脚本见 [tools/icon-gen/](tools/icon-gen/)）：
+
+- **桌面主图标**：固定 Pixiv 蓝版
+- **应用内**：随明暗模式自动切换 —— 浅色 = 白底饱和版，深色 = Pixiv 蓝版
 
 <div align="center">
-  <img src="assets/app_icon_round.png" alt="PixLume Icon" width="120">
+  <img src="assets/app_icon.png" alt="深色/桌面版" width="96">
+  <img src="assets/app_icon_light.png" alt="浅色版" width="96">
 </div>
-
-本项目的应用图标由作者 **[March](https://github.com/SYTKILLER)** 设计。
 
 ## 🛠 技术栈
 
-- **开发语言**：ArkTS / TypeScript
+- **开发语言**：ArkTS / TypeScript（@ComponentV2 状态管理）
 - **运行环境**：HarmonyOS 6.1.1（API 24）及以上
-- **网络请求**：@ohos/axios / RCP
-- **本地存储**：Preferences / KV Store
-- **开发工具**：DevEco Studio 6.1+（HarmonyOS SDK 6.1.1）
-
-## 📥 下载安装
-
-前往 [GitHub Releases](https://github.com/SYTKILLER/PixLume/releases/latest) 下载最新版本的 HAP 安装包。
-
-> ⚠️ 使用本应用需要你的设备能够访问 Pixiv。
-
-各版本更新内容见 [CHANGELOG.md](CHANGELOG.md)。
+- **网络**：@ohos/axios / RCP，直连模式静态 DNS + DoH
+- **图片**：@ohos/imageknifepro（降采样 + 二级缓存）
+- **存储**：Preferences / KV Store（自研 ORM + DAO）
+- **开发工具**：DevEco Studio 6.1+
 
 ## 🧑‍💻 本地构建
 
-1. 克隆本仓库：
+1. 克隆本仓库（远程仓库创建后）：`git clone https://github.com/lizheming/PixHarbor.git`
+2. DevEco Studio 打开项目，等待依赖同步（或 `ohpm install`）
+3. 签名：`File > Project Structure > Signing Configs` 勾选自动生成调试签名
+   （**换牌后 bundleName 已变更，需重新生成签名证书**）
+4. 连接设备 Run，或命令行：
 
-    ```bash
-    git clone https://github.com/SYTKILLER/PixLume.git
-    ```
+   ```bash
+   hvigorw assembleHap --mode module -p product=default -p buildMode=release --no-daemon
+   ```
 
-2. 使用 DevEco Studio 打开项目，等待依赖自动同步完成（或手动执行 `ohpm install`）。
-3. 配置签名：`File > Project Structure > Signing Configs`，勾选自动生成签名（调试），或使用自有证书。
-4. 连接设备或启动模拟器，点击 Run 运行；也可以使用命令行构建：
+## 🌐 网络说明
 
-    ```bash
-    hvigorw assembleHap --mode module -p product=default -p buildMode=release --no-daemon
-    ```
+国内网络下 Pixiv 域名存在 DNS 污染：直连模式以候选 IP + 静态 DNS 尽力而为（节点表见
+`entry/src/main/ets/common/utils/HostMap.ts`，失效时自动回退普通模式）；开启 VPN 时自动走普通模式，两者可共存。
+详见实施文档 §5.4。
 
-## 🤝 贡献指南
+## 🗺 演进计划
 
-欢迎提交 Issue 和 Pull Request！
-
-1. Fork 本仓库
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启 Pull Request
+- **P2 性能**：主瀑布流 ForEach → LazyForEach、Swiper 缓存、预加载与冷启动优化
+- **P3 功能**：历史排行（首项）、以图搜图（SauceNAO 自研）、随便看看等差距项
+- 详见 [docs/方案1-基于PixLume二次开发实施方案.md](docs/方案1-基于PixLume二次开发实施方案.md)
 
 ## 🙏 致谢
 
-本项目的开发离不开开源社区的无私分享与支持，特此感谢以下项目与开发者：
+- **[SYTKILLER/PixLume](https://github.com/SYTKILLER/PixLume)**（上游基线，作者 [March](https://github.com/SYTKILLER)）
+- **[XHXYT/Pixark](https://github.com/XHXYT/Pixark)**、**[Pixiv-Shaft](https://github.com/CeuiLiSA/Pixiv-Shaft)**、**[Pixez](https://github.com/Notsfsssf/pixez-flutter)**、**[PixivPy](https://github.com/upbit/pixivpy)**（上游致谢链）
+- **[pixiv-viewer-app](https://github.com/asadahimeka/pixiv-viewer-app)**（仅功能思路参考，AGPL-3.0，未复制代码）
 
-- **[XHXYT/Pixark](https://github.com/XHXYT/Pixark)**：PixLume 的前身项目，感谢原作者 [XHXYT](https://github.com/XHXYT) 的开源贡献。本项目在其代码基础上持续重构、修复并新增功能，最终发展为独立应用。
-- **[Pixiv-Shaft](https://github.com/CeuiLiSA/Pixiv-Shaft)**：一款优秀的第三方 Pixiv Android 客户端。PixLume 在界面与交互设计上参考了 Shaft 的设计理念，直连模式的候选节点方案亦来自该项目，感谢 [CeuiLiSA](https://github.com/CeuiLiSA)。
-- **[Pixez](https://github.com/Notsfsssf/pixez-flutter)**：一款优秀的第三方 Pixiv Flutter 客户端。Pixez 优雅的 UI 设计和成熟的业务逻辑为项目的架构设计提供了重要的灵感和参考。
-- **[PixivPy](https://github.com/upbit/pixivpy)**：强大的 Python 版 Pixiv API 库。其完善的 API 接口定义和签名逻辑，为理解 Pixiv 协议提供了极大的帮助。
-- **[HarmonyOS Developer Community]**：感谢鸿蒙社区开发者在技术探索上的贡献。
+完整第三方声明见 [NOTICE.md](NOTICE.md)。
 
 ## ⚠️ 免责声明
 
-- **PixLume** 是一个非官方的第三方客户端，与 Pixiv Inc. 没有任何从属关系。
-- 本项目仅供学习交流使用，请勿用于商业用途。使用本软件所产生的一切风险和责任由使用者自行承担。
-- 请遵守 Pixiv 官方的服务条款及相关法律法规。
-
----
+- **PixHarbor** 是非官方第三方客户端，与 Pixiv Inc. 没有任何从属关系。
+- 本项目仅供学习交流使用，请勿用于商业用途；使用风险与责任由使用者自行承担。
+- 请遵守 Pixiv 官方服务条款及相关法律法规。
 
 ## 📄 开源协议
 
-本项目基于 [GNU General Public License v3.0](LICENSE) 开源。
-
-你可以自由地使用、修改和分发本软件，但所有衍生作品必须以相同的协议（GPLv3）开源。
-详见 [LICENSE](LICENSE) 文件或 [GNU GPLv3 官方说明](https://www.gnu.org/licenses/gpl-3.0)。
+本项目基于 [GNU General Public License v3.0](LICENSE) 开源（上游 PixLume 同为 GPL-3.0）。
+你可以自由使用、修改和分发本软件，但所有衍生作品必须以相同协议开源。

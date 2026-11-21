@@ -1,8 +1,19 @@
 # Changelog
 
-本项目的所有版本更新日志将记录在本文件中
+> **PixHarbor fork 说明**：本仓库基于上游 [SYTKILLER/PixLume](https://github.com/SYTKILLER/PixLume) v1.2.0（commit ae6d6a3）二次开发。
+> 1.2.0 及以下的日志为上游 PixLume 历史，保留作致谢与溯源；PixHarbor 自身版本自 0.1.0 起记。
 
-## [1.2.0] - 2026-10-04
+## [0.1.0] - 2026-11-21（PixHarbor）
+
+### 变更
+
+- 换牌：bundleName `com.prixiv.view`、显示名 PixHarbor、vendor prixiv、版本重置 0.1.0
+- 自制「叠影 P」图标：桌面固定 Pixiv 蓝；应用内明暗自动切换（浅=白底饱和版 / 深=Pixiv 蓝）
+- 仓库与更新检查链接指向 lizheming/PixHarbor（远程仓库待创建，创建前检查更新友好失败）
+- 本地存储键名 `pixlume_*` → `pixharbor_*`；导出文件名前缀 `PixHarbor_`
+- 关于页新增上游 PixLume 致谢条目；NOTICE.md 与 docs/ 入库
+
+## [1.2.0] - 2026-10-04（上游 PixLume）
 
 ### 新增功能
 

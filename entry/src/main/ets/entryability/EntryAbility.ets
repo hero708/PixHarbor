@@ -179,9 +179,9 @@ export default class EntryAbility extends UIAbility {
     // 初始化上下文
     _PixState.Context = this.context
     // 初始化首选项
-    await preferenceUtil.init(this.context, 'pixlume_preference');
+    await preferenceUtil.init(this.context, 'pixharbor_preference');
     // 初始化KV数据库
-    await kvDbUtil.initKVManager(this.context, 'pixlume')
+    await kvDbUtil.initKVManager(this.context, 'pixharbor')
     // 初始化关键词收藏/屏蔽（本地表加载进内存缓存，供列表过滤与详情页高亮）
     tagCollectionService.init(this.context)
     // 加载设置数据

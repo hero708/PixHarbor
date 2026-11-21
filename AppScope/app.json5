@@ -1,9 +1,9 @@
 {
   "app": {
-    "bundleName": "com.march.pixlume",
-    "vendor": "march",
-    "versionCode": 1002000,
-    "versionName": "1.2.0",
+    "bundleName": "com.prixiv.view",
+    "vendor": "prixiv",
+    "versionCode": 1000000,
+    "versionName": "0.1.0",
     "icon": "$media:layered_image",
     "label": "$string:app_name"
   }

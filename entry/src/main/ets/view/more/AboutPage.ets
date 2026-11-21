@@ -81,7 +81,7 @@ struct AboutPage {
         onChange: () => {
           toastUtil.showAlertDialog({
             title: $r('app.string.project_intro'),
-            message: 'PixLume 是一款为 HarmonyOS 开发的原生轻量级 Pixiv 第三方客户端，旨在为鸿蒙用户提供原生流畅的插画与小说浏览体验。',
+            message: 'PixHarbor 是一款为 HarmonyOS 开发的原生轻量级 Pixiv 第三方客户端（基于上游 PixLume 二次开发），旨在为鸿蒙用户提供原生流畅的插画与小说浏览体验。',
             alignment: DialogAlignment.Center,
             primaryButton: { value: 'OK', action: () => {} }
           })
@@ -136,6 +136,14 @@ struct AboutPage {
       }),
       // 致谢组
       new CustomItemInfo({ id: 'thanks', title: $r('app.string.thanks'), type: ItemActionType.GROUP }),
+      new CustomItemInfo({
+        symbol: $r('sys.symbol.arrow_2_circlepath'),
+        title: 'PixLume（上游基线）',
+        subtitle: '本项目基于其 v1.2.0 代码二次开发（GPL-3.0）',
+        type: ItemActionType.ROUTER,
+        id: 'thanks_pixlume',
+        onChange: () => { JumpUtil.goToWeb('https://github.com/SYTKILLER/PixLume') }
+      }),
       new CustomItemInfo({
         icon: $rawfile('ya.jfif'),
         title: 'Pixark',
@@ -194,7 +202,7 @@ struct AboutPage {
         onChange: () => {
           toastUtil.showAlertDialog({
             title: $r('app.string.disclaimer'),
-            message: 'PixLume 是非官方第三方客户端，与 Pixiv Inc. 无任何从属关系。本项目仅供学习交流，请勿用于商业用途。使用本软件所产生的一切风险与责任由使用者自行承担，请遵守 Pixiv 官方服务条款及相关法律法规。',
+            message: 'PixHarbor 是非官方第三方客户端，与 Pixiv Inc. 无任何从属关系。本项目仅供学习交流，请勿用于商业用途。使用本软件所产生的一切风险与责任由使用者自行承担，请遵守 Pixiv 官方服务条款及相关法律法规。',
             alignment: DialogAlignment.Center,
             primaryButton: { value: 'OK', action: () => {} }
           })
@@ -332,7 +340,7 @@ struct AboutPage {
         .borderRadius(20)
         .margin({ top: 12 })
 
-      Text('PixLume')
+      Text('PixHarbor')
         .fontSize(26)
         .fontWeight(FontWeight.Bold)
         .fontColor($r('sys.color.font_primary'))
