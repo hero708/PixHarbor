@@ -170,7 +170,8 @@ export class UserDetailViewModel implements IIllustSwiperProvider {
       const newIllusts = data.illusts || [];
 
       if (isLoadMore) {
-        this.userIllusts.push(...newIllusts);
+        // 替换引用（而非原地 push）：WaterFlowView 的 @Monitor('illustList') 依赖引用变化同步 LazyForEach 数据源
+        this.userIllusts = [...this.userIllusts, ...newIllusts];
       } else {
         this.userIllusts = newIllusts;
       }
@@ -201,7 +202,8 @@ export class UserDetailViewModel implements IIllustSwiperProvider {
       const newMangas = data.illusts || [];
 
       if (isLoadMore) {
-        this.userMangas.push(...newMangas);
+        // 替换引用（而非原地 push）：同上，保证 LazyForEach 数据源同步
+        this.userMangas = [...this.userMangas, ...newMangas];
       } else {
         this.userMangas = newMangas;
       }

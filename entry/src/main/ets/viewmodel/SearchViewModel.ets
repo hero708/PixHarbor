@@ -318,7 +318,8 @@ export class SearchViewModel implements IIllustSwiperProvider {
           const existingIds = new Set(this.resultIllusts.map(i => i.id));
           const unique = list.filter(i => !existingIds.has(i.id));
           appended = unique.length;
-          this.resultIllusts.push(...unique);
+          // 替换引用（而非原地 push）：WaterFlowView 的 @Monitor('illustList') 依赖引用变化同步 LazyForEach 数据源
+          this.resultIllusts = [...this.resultIllusts, ...unique];
           url = data.next_url || undefined;
           this.IllustNextUrl = url || '';
         } else if (this.searchType === 'novel') {
