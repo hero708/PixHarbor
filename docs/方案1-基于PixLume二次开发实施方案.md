@@ -279,6 +279,15 @@ git checkout -b master FETCH_HEAD
 
 **度量方法**：DevEco Profiler（Frame / Allocation / Time）或 SmartPerf；对照 P0 记录的基线，比较：瀑布流连续滑动 30s 的平均帧率与最差帧、浏览 100 张后的内存峰值、冷启动耗时。**每项优化单独提交，可回滚。**
 
+**P2 执行记录（2026-11-21 已完成，真机冒烟通过）**：
+
+- **瀑布流懒加载（已做）**：`components/WaterFlowView.ets` ForEach→`LazyForEach(BaseDataSource)`（复用现成 `viewmodel/BaseDataSource.ets`），`aboutToAppear` + `@Monitor('illustList')` 同步数据集；key `${id}${title}`→稳定 `${illust.id}`（各 VM 均已 id 去重，验证安全）；`.cachedCount(3)`；`onScrollIndex` 剩余 <8 条提前触发 `onReachEnd`（`prefetchMark` 按列表长度节流，防重复 toast）。7 个调用点（Home/Rank/Trend/Collection/UserDetail/UserBookmark/Searching）一次受益。
+- **配套 VM 修正（已做）**：原地 `push` 不触发 `@Monitor` 引用比较 → `SearchViewModel.ets:321`、`UserDetailViewModel.ets:173/204` 改 spread 替换引用（小说/用户列表未转换 LazyForEach，其 push 不动）。
+- **验证无需改（上游已优化）**：详情页 Swiper `cachedCount(1,false)` + RequestGate 限流 + LRU 去重（`IllustDetailPage.ets:202-204`）；冷启动网络探测提前并行、末尾 await、`initFileCache(256,256MB)`、同步非阻塞（`EntryAbility.ets:198-215`）；图片预览默认 `medium`（540px 保宽高比，`SettingsModel.ets:74` + `ImageUtils.ts:52`），原图仅详情/下载。
+- **暂缓**：`@Reusable`（与 `@ComponentV2` 兼容风险，LazyForEach 已是主要收益，后续 Profiler 数据驱动再评估）。
+- **真机冒烟（hdc uitest + 截屏）**：插画模式首页瀑布流正常渲染（特辑 banner + 推荐作者 + 双列错落卡片全加载）；连续两屏滑动后新内容正常懒加载、无空白/崩溃；小说↔插画模式切换正常（排行页签随模式显隐）。构建 9.9s 成功、安装启动成功。
+- **待用户验证**：长时间滑动流畅度主观感受；如需量化帧率/内存，用 DevEco Profiler 对照上游基线。
+
 ### P3：UI / 功能定制（持续迭代，按需排期）
 
 先明确**上游已有**的能力（实测，详见 §2.4），避免重复造轮子：多账号（`view/user/UserAccounts.ets`）、特辑推荐、搜索补全 + ID 直达、热门预览、长按手势、导出 Token、本地备份、平板/折叠屏断点适配（`breakpoint/`）、暗色模式、下载管理、关键词屏蔽、小说系列页、桌面卡片。
