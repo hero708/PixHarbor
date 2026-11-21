@@ -14,14 +14,14 @@ export class AppConstants {
   // 重定向链接
   static readonly REDIRECT_URI: string = 'https://app-api.pixiv.net/web/v1/users/auth/pixiv/callback'
 
-  // TODO: 远程仓库创建后生效；创建前检查更新会友好失败（toast 提示）
-  static readonly GITHUB_OWNER_URL = 'https://github.com/lizheming'
+  // 远程仓库：https://github.com/hero708/PixHarbor（2026-11-21 已创建，公开）
+  static readonly GITHUB_OWNER_URL = 'https://github.com/hero708'
 
-  static readonly GITHUB_REPO_URL = 'https://github.com/lizheming/PixHarbor'
+  static readonly GITHUB_REPO_URL = 'https://github.com/hero708/PixHarbor'
 
   // GitHub Releases 最新版接口（检查更新用）
-  static readonly GITHUB_RELEASES_API_URL = 'https://api.github.com/repos/lizheming/PixHarbor/releases/latest'
+  static readonly GITHUB_RELEASES_API_URL = 'https://api.github.com/repos/hero708/PixHarbor/releases/latest'
   // GitHub Releases 页面（前往更新时兜底跳转用）
-  static readonly GITHUB_RELEASES_URL = 'https://github.com/lizheming/PixHarbor/releases'
+  static readonly GITHUB_RELEASES_URL = 'https://github.com/hero708/PixHarbor/releases'
 
 }

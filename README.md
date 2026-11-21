@@ -51,7 +51,7 @@ PixHarbor 基于上游开源项目 [SYTKILLER/PixLume](https://github.com/SYTKIL
 
 ## 🧑‍💻 本地构建
 
-1. 克隆本仓库（远程仓库创建后）：`git clone https://github.com/lizheming/PixHarbor.git`
+1. 克隆本仓库：`git clone https://github.com/hero708/PixHarbor.git`
 2. DevEco Studio 打开项目，等待依赖同步（或 `ohpm install`）
 3. 签名：`File > Project Structure > Signing Configs` 勾选自动生成调试签名
    （**换牌后 bundleName 已变更，需重新生成签名证书**）

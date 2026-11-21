@@ -21,6 +21,21 @@
       {
         "name": "release"
       }
+    ],
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "C:\\Users\\lzm70\\.ohos\\config\\default_Prixiv_View_oapu9X1mJcLAUYWkT3z1GLLT_QM3SxnN3Ed8LBTcD4E=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001B6FE09C66FF632D84D6962F3AFB12C0D99F7F04E3BF00B009270023B2C8062F36CFFC7C8FE22961",
+          "profile": "C:\\Users\\lzm70\\.ohos\\config\\default_Prixiv_View_oapu9X1mJcLAUYWkT3z1GLLT_QM3SxnN3Ed8LBTcD4E=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "C:\\Users\\lzm70\\.ohos\\config\\default_Prixiv_View_oapu9X1mJcLAUYWkT3z1GLLT_QM3SxnN3Ed8LBTcD4E=.p12",
+          "storePassword": "0000001B795CF57DE0517C28212F7B1E57C96342E3C92CC1078654D42C1C2612AAC8C8B4C3C05AA2F06CDF"
+        }
+      }
     ]
   },
   "modules": [

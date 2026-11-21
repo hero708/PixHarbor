@@ -9,7 +9,7 @@
 
 - 换牌：bundleName `com.prixiv.view`、显示名 PixHarbor、vendor prixiv、版本重置 0.1.0
 - 自制「叠影 P」图标：桌面固定 Pixiv 蓝；应用内明暗自动切换（浅=白底饱和版 / 深=Pixiv 蓝）
-- 仓库与更新检查链接指向 lizheming/PixHarbor（远程仓库待创建，创建前检查更新友好失败）
+- 仓库与更新检查链接指向 hero708/PixHarbor（远程仓库已创建：https://github.com/hero708/PixHarbor）
 - 本地存储键名 `pixlume_*` → `pixharbor_*`；导出文件名前缀 `PixHarbor_`
 - 关于页新增上游 PixLume 致谢条目；NOTICE.md 与 docs/ 入库
 
