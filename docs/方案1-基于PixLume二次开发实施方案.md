@@ -316,6 +316,17 @@ git checkout -b master FETCH_HEAD
 - **真机 E2E（hdc uitest + 截屏逐项验证）**：小说模式 5 页签可读；周榜切换内容独立；日期选择器回显 2026-11-20（JST 滞后✓）→确定后日期胶囊+历史榜单→xmark 清除回最新；编辑面板小说标签回显 5 勾选（R-18 受 show_H 门控不显示）、取消勾选灰色描边样式正确、关闭自动保存。
 - **环境观察（非代码问题）**：tunbox VPN 开启期间部分新封面下载失败/停滞（错误占位"图片可能不存在"），各列表（排行/动态/首页）表现一致、已缓存图正常、API 正常→代理节点对 pximg 图床的连通质量问题；后续候选：图床镜像回退（i.pixiv.re/i.pixiv.cat，`ImageUtils.ts` 已有镜像常量）或提示用户检查 tunbox 分流规则。
 
+**P3-1 执行记录（2026-11-21 已完成，小说阅读体验，版本 0.3.0）**：
+
+- **勘察修正**：阅读器上游已有字号 Slider(14-28)/行距 chips/三主题(light/sepia/dark)/原生+Web 双渲染；真缺口=字号行距仅会话级、无进度记忆、无自动翻页、无进度显示。
+- **进度记忆**：新增 `common/utils/ReadingProgressUtil.ts`（偏好键 `novel_read_progress_json`，Record<id,{ratio,ts}>，400ms 防抖落盘、300 条按 ts 淘汰、<1% 或 >99% 不记）；详情页按钮 `继续阅读 · x%` + 「从头阅读」次级动作；进入阅读按存盘比例 scrollTo 恢复；自动翻页逐 tick 防抖落盘（进程被杀不丢）。**教训：.ts 禁止 import .ets（10605999），键名与 AppConstants 双写注释同步**。
+- **设置持久化**：`SettingsModel.ets` UISettings +reader_font_size/reader_line_height/reader_auto_scroll/reader_auto_speed（load/save/reset/@Monitor 四处同步）；`NovelDetailViewModel` 字号行距改 get/set 委托 UISettings。
+- **自动翻页**：设置面板 Toggle+速度 Slider(1-10)；setInterval 50ms、pxPerSec=20+speed*15，native scrollBy / web runJavaScript scrollBy；触摸即停、到底自停+toast；重进阅读按持久化开关自启。
+- **进度条与顶栏**：阅读模式顶部 2vp 线性 Progress（y=topRectHeight 避状态栏）；顶栏改实色背景（上游渐隐遮罩滚动透字）。
+- **修复上游 bug**：`view/more/PixHistory.ets:209` openNovel 向 novel_detail push null→详情永久转圈，改 push `{ id }`（NovelDetailParams）；`navigateToNovel` 同步 novelId（评论面板目标此前错用旧 id）。
+- **真机 E2E + 用户并行验证**：面板字号/行距/主题/自动翻页开关+速度✓；自动前进✓触摸停✓；跨 install/force-stop 进度持久化（继续阅读·1%→2%）✓；从头阅读✓；重进恢复+自启✓；用户手动确认顶栏与自动翻页稳定、进度标签正常✓。
+- **教训**：E2E 期间用户并行操作真机→截图/dump 态不一致先问用户再怀疑代码（曾误追"顶栏透字/自动退出"幻影 bug 两轮构建）；uitest click 空参打印 USAGE 不点击；read-only pwsh 的 $env:TEMP 是隔离目录，跨调用用绝对路径。
+
 ### P4：构建与发布（0.5~1 天）
 
 ```powershell
