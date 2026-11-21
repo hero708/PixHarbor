@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 """PixHarbor 换牌：把选定的叠影 P 图标写成 HarmonyOS 资源。
 
-决策（用户 2026-11-21 确认）：
-  - 桌面主图标固定 8 号 Pixiv 蓝（AppScope 分层 + entry 分层 base，不做 dark 覆盖）
-  - 应用内明暗自动切换：浅色=9 融合增强（白底饱和 P），深色=8
+决策（用户 2026-11-21 确认，同日二次调整）：
+  - 桌面主图标固定 **9 号浅色版**（白底饱和 P）：AppScope 分层 + entry 分层 base，不做 dark 覆盖
+    （二次调整前为 8 号 Pixiv 蓝；用户要求桌面换浅色，其他图标配置不变）
+  - 应用内明暗自动切换（不变）：浅色=9 融合增强，深色=8
     载体：entry base/dark 的 app_icon.png / app_icon_round.png / startIcon.png
     （splash startWindowAppIcon、Index/Login logo 用 app_icon_round；About logo 用 app_icon）
-  - assets/app_icon.png(8) / assets/app_icon_light.png(9) 供 README 引用（入库）
+  - assets/app_icon.png(9，桌面/浅色) / assets/app_icon_dark.png(8，应用内深色) 供 README 引用（入库）
 
 仿 tunbox apply_icon.py：background 全幅渐变（系统裁圆角）、foreground 透明安全区、
-合成圆角回退图、.orig 备份（已加入 .gitignore）。
+合成圆角回退图。备份写入 tools/icon-gen/orig-backups/（资源目录内严禁 *.orig，会触发
+CompileResource 11211116 Invalid resource name）。
 """
 import os
 import shutil
@@ -22,11 +24,12 @@ APP_MEDIA = os.path.join(ROOT, "AppScope", "resources", "base", "media")
 ENTRY_BASE = os.path.join(ROOT, "entry", "src", "main", "resources", "base", "media")
 ENTRY_DARK = os.path.join(ROOT, "entry", "src", "main", "resources", "dark", "media")
 ASSETS = os.path.join(ROOT, "assets")
+ORIG_BACKUPS = os.path.join(ROOT, "tools", "icon-gen", "orig-backups")
 
-# 8 号：Pixiv 蓝 + 原版半透明青/粉叠影
+# 8 号：Pixiv 蓝 + 原版半透明青/粉叠影（应用内深色）
 BG8 = dict(top='#00A5F0', bottom='#0057B8', glow='#7FD4FF', glow_alpha=0.5)
 P8 = ((34, 211, 238, 215), (244, 114, 182, 215), 60)
-# 9 号：浅色白底 + 饱和青/玫红叠影
+# 9 号：浅色白底 + 饱和青/玫红叠影（桌面 + 应用内浅色）
 BG9 = dict(top='#F8FAFC', bottom='#D8E2F0', glow='#FFFFFF', glow_alpha=0.6)
 P9 = ((8, 145, 178, 230), (219, 39, 119, 230), 30)
 
@@ -59,9 +62,13 @@ def composite(size, bg, l1, l2, shadow):
 
 
 def backup(p):
-    if os.path.exists(p) and not os.path.exists(p + '.orig'):
-        shutil.copy2(p, p + '.orig')
-        print('backup ->', p + '.orig')
+    # 备份到资源目录之外（orig-backups/<相对路径>.prev），避免 *.orig 混入资源编译
+    rel = os.path.relpath(p, ROOT)
+    dst = os.path.join(ORIG_BACKUPS, rel + '.prev')
+    if os.path.exists(p) and not os.path.exists(dst):
+        os.makedirs(os.path.dirname(dst), exist_ok=True)
+        shutil.copy2(p, dst)
+        print('backup ->', dst)
 
 
 def put(p, im):
@@ -86,15 +93,15 @@ def main():
     bg8s = bg8.resize((1024, 1024), LANCZOS)
     bg9s = bg9.resize((1024, 1024), LANCZOS)
 
-    # 桌面分层图标：固定 8（AppScope 与 entry base 一致；entry 不做 dark 分层覆盖）
+    # 桌面分层图标：固定 9 浅色（AppScope 与 entry base 一致；entry 不做 dark 分层覆盖）
     for d in (APP_MEDIA, ENTRY_BASE):
-        put(os.path.join(d, 'background.png'), bg8s)
-        put(os.path.join(d, 'foreground.png'), fg8)
+        put(os.path.join(d, 'background.png'), bg9s)
+        put(os.path.join(d, 'foreground.png'), fg9)
     for name in ('app_icon.png', 'app_icon_round.png'):
         p = os.path.join(APP_MEDIA, name)
-        put(p, composite(existing_size(p, 512), bg8, l18, l28, sh8))
+        put(p, composite(existing_size(p, 512), bg9, l19, l29, sh9))
 
-    # 应用内：base=9（浅色），dark=8（深色）
+    # 应用内（不变）：base=9（浅色），dark=8（深色）
     for name, default in (('app_icon.png', 512), ('app_icon_round.png', 512), ('startIcon.png', 256)):
         pb = os.path.join(ENTRY_BASE, name)
         pd = os.path.join(ENTRY_DARK, name)
@@ -102,15 +109,15 @@ def main():
         put(pb, composite(size, bg9, l19, l29, sh9))
         put(pd, composite(existing_size(pd, size), bg8, l18, l28, sh8))
 
-    # README 用图（入库）
-    put(os.path.join(ASSETS, 'app_icon.png'), composite(1024, bg8, l18, l28, sh8))
-    put(os.path.join(ASSETS, 'app_icon_light.png'), composite(1024, bg9, l19, l29, sh9))
+    # README 用图（入库）：桌面/浅色=9，应用内深色=8
+    put(os.path.join(ASSETS, 'app_icon.png'), composite(1024, bg9, l19, l29, sh9))
+    put(os.path.join(ASSETS, 'app_icon_dark.png'), composite(1024, bg8, l18, l28, sh8))
 
-    # 预览：桌面 / 应用内浅色 / 应用内深色
+    # 预览：桌面(9) / 应用内浅色(9) / 应用内深色(8)
     cell, pad = 360, 30
     sheet = Image.new('RGB', (3 * cell + 4 * pad, cell + 2 * pad), (243, 246, 251))
     dark = Image.new('RGB', (cell + 2 * pad, cell + 2 * pad), (18, 22, 30))
-    icons = [composite(cell, bg8, l18, l28, sh8),
+    icons = [composite(cell, bg9, l19, l29, sh9),
              composite(cell, bg9, l19, l29, sh9),
              composite(cell, bg8, l18, l28, sh8)]
     sheet.paste(icons[0], (pad, pad), icons[0])

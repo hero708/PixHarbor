@@ -32,12 +32,12 @@ PixHarbor 基于上游开源项目 [SYTKILLER/PixLume](https://github.com/SYTKIL
 
 自制「叠影 P」设计（生成脚本见 [tools/icon-gen/](tools/icon-gen/)）：
 
-- **桌面主图标**：固定 Pixiv 蓝版
+- **桌面主图标**：固定浅色版（白底饱和 P）
 - **应用内**：随明暗模式自动切换 —— 浅色 = 白底饱和版，深色 = Pixiv 蓝版
 
 <div align="center">
-  <img src="assets/app_icon.png" alt="深色/桌面版" width="96">
-  <img src="assets/app_icon_light.png" alt="浅色版" width="96">
+  <img src="assets/app_icon.png" alt="桌面/浅色版" width="96">
+  <img src="assets/app_icon_dark.png" alt="应用内深色版" width="96">
 </div>
 
 ## 🛠 技术栈
