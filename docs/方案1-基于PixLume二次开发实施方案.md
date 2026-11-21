@@ -307,6 +307,15 @@ git checkout -b master FETCH_HEAD
 10. **小说体验**：字号/行距/背景主题、阅读进度记忆（借 viewer）、自动翻页
 11. **数据管理**：历史/缓存一键清理（`view/more/AppData.ets` 已有雏形，扩展）
 
+**P3 首项执行记录（2026-11-21 已完成，用户选定"历史排行"为先，版本 0.2.0）**：
+
+- **勘察修正**：历史排行的 date 参数与日期选择器上游已实现（`PixivData.ts:165/342` 透传 date；`RankViewModel.latestAvailableDate()` 按 JST 发布滞后推算最新可用日），真正缺口是 UX 与小说侧：取消误重置日期、无当前日期显示、小说模式排行入口被隐藏（`pages/Index.ets:353` 旧注释"源站无小说排行榜"不成立，`/v1/novel/ranking` 可用）、`novel_rank_modes` 未持久化、编辑面板仅插画。
+- **小说排行榜放出**：`Index.ets` 排行页签无条件加入；`UserSettings.ets` 启动页选项小说模式可选；`RankViewModel` 编辑/保存/空配置判断全部模式感知；`SettingsModel.ets` load/save/reset/@Monitor 补 `novel_rank_modes`。
+- **历史排行 UX**：`Rank.ets` 头部改两行——选中日期时第二行主题色日期胶囊（点击重开选择器）+ xmark 清除钮（回最新）；`pickerSelectedDate()` 回显当前日期；`onCancel` 不再清日期。
+- **修复上游两个隐藏 bug**：①`novel_rank_modes || 默认表` 空数组 truthy 回退失效→排行榜空白，改 `novelModes` getter 显式长度判断（默认 5 个非 R-18 榜单 `NOVEL_RANK_DEFAULT_MODES`）；②分段按钮等宽分栏默认 16vp 横向内边距把多页签标签挤成"..."，`TabSegmentButtonV2` 的 itemFontSize/itemPadding 是 @Param 必须走构造参数（链式调用编译报 10605999），收紧为 13fp/8vp 并精简小说标签（男性向/女性向/新人）。
+- **真机 E2E（hdc uitest + 截屏逐项验证）**：小说模式 5 页签可读；周榜切换内容独立；日期选择器回显 2026-11-20（JST 滞后✓）→确定后日期胶囊+历史榜单→xmark 清除回最新；编辑面板小说标签回显 5 勾选（R-18 受 show_H 门控不显示）、取消勾选灰色描边样式正确、关闭自动保存。
+- **环境观察（非代码问题）**：tunbox VPN 开启期间部分新封面下载失败/停滞（错误占位"图片可能不存在"），各列表（排行/动态/首页）表现一致、已缓存图正常、API 正常→代理节点对 pximg 图床的连通质量问题；后续候选：图床镜像回退（i.pixiv.re/i.pixiv.cat，`ImageUtils.ts` 已有镜像常量）或提示用户检查 tunbox 分流规则。
+
 ### P4：构建与发布（0.5~1 天）
 
 ```powershell
