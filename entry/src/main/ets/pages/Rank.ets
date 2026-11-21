@@ -9,13 +9,12 @@ import { PixivNovel } from "../services/PixivTypes"
 import { EmptyStateView } from "../components/CommonWidgets"
 import UIConstants from "../common/constants/UIConstants"
 import { FunctionConstants } from "../common/constants/FunctionConstants"
-import { SegmentButtonV2ItemOptions, SegmentButtonV2Items, TabSegmentButtonV2 } from '@kit.ArkUI'
+import { SegmentButtonV2ItemOptions, SegmentButtonV2Items, TabSegmentButtonV2, LengthMetrics } from '@kit.ArkUI'
 
 
 @ComponentV2
 export struct Rank {
   @Local showEditPanel: boolean = false
-  private selectedDate: Date = new Date()
   private swiperController: SwiperController = new SwiperController()
 
   // 分段按钮选项：榜单配置（勾选/排序/插画小说模式）变化时自动重建
@@ -24,6 +23,12 @@ export struct Rank {
     return new SegmentButtonV2Items(
       rankVM.activeTabs.map((tab): SegmentButtonV2ItemOptions => ({ text: tab.label }))
     );
+  }
+
+  // 榜单分类标签表：随插画/小说全局模式切换（P3 小说排行榜）
+  @Computed
+  get rankModeLabels(): Record<string, string> {
+    return appSettings.novel_mode ? FunctionConstants.NOVEL_RANK_MODES : FunctionConstants.ILLUST_RANK_MODES;
   }
 
   aboutToAppear(): void {
@@ -57,64 +62,112 @@ export struct Rank {
     })
   }
 
-  // 头部区域
+  // 头部区域：第一行分类分段按钮+操作钮；选中历史日期时日期胶囊独占第二行，避免挤压分段按钮宽度
   @Builder Header() {
-    Row({ space: 8 }) {
-      // 分类分段按钮
-      Row() {
-        if (rankVM.activeTabs.length > 0) {
-          TabSegmentButtonV2({
-            items: this.rankTabItems,
-            selectedIndex: rankVM.currentTabIndex(),
-            enableStateAnimation: true,
-            onItemClicked: (index: number) => {
-              this.onSegmentClick(index)
-            }
-          })
-        }
-      }
-      .layoutWeight(1)
-
-      // 日期按钮
-      Button({ type: ButtonType.Circle }) {
-        SymbolGlyph($r('sys.symbol.calendar'))
-          .fontColor([$r('sys.color.font_primary')])
-          .fontSize(22)
-      }
-      .width(40).height(40)
-      .backgroundColor($r('sys.color.button_background_color_transparent'))
-      .onClick(() => {
-        _PixState.UIContext.showDatePickerDialog({
-          start: new Date(2000, 0, 1),
-          // Pixiv 榜单按 JST 发布滞后一天，未发布日期选了也只会得到空列表
-          end: rankVM.latestAvailableDate(),
-          selected: this.selectedDate,
-          showTime: false,
-          onDateAccept: (value: Date) => {
-            this.selectedDate = new Date(value);
-            rankVM.changeDate(this.selectedDate)
-          },
-          onCancel: () => {
-            // 重置时间数据为默认
-            rankVM.clearDate()
+    Column({ space: 4 }) {
+      Row({ space: 8 }) {
+        // 分类分段按钮
+        Row() {
+          if (rankVM.activeTabs.length > 0) {
+            TabSegmentButtonV2({
+              items: this.rankTabItems,
+              selectedIndex: rankVM.currentTabIndex(),
+              enableStateAnimation: true,
+              // 等宽分栏下默认 16vp 横向内边距会把标签挤成"..."，收紧内边距与字号保证 5 页签可读
+              itemFontSize: LengthMetrics.fp(13),
+              itemSelectedFontSize: LengthMetrics.fp(13),
+              itemPadding: {
+                top: LengthMetrics.vp(6),
+                bottom: LengthMetrics.vp(6),
+                start: LengthMetrics.vp(8),
+                end: LengthMetrics.vp(8)
+              },
+              onItemClicked: (index: number) => {
+                this.onSegmentClick(index)
+              }
+            })
           }
-        })
-      })
+        }
+        .layoutWeight(1)
 
-      // 编辑/配置 Tab 按钮
-      Button({ type: ButtonType.Circle }) {
-        SymbolGlyph($r('sys.symbol.square_and_pencil'))
-          .fontColor([$r('sys.color.font_primary')])
-          .fontSize(22)
+        // 未选日期：日历圆钮入口
+        if (!rankVM.currentDate) {
+          Button({ type: ButtonType.Circle }) {
+            SymbolGlyph($r('sys.symbol.calendar'))
+              .fontColor([$r('sys.color.font_primary')])
+              .fontSize(22)
+          }
+          .width(40).height(40)
+          .backgroundColor($r('sys.color.button_background_color_transparent'))
+          .onClick(() => this.openDatePicker())
+        }
+
+        // 编辑/配置 Tab 按钮
+        Button({ type: ButtonType.Circle }) {
+          SymbolGlyph($r('sys.symbol.square_and_pencil'))
+            .fontColor([$r('sys.color.font_primary')])
+            .fontSize(22)
+        }
+        .width(40).height(40)
+        .backgroundColor($r('sys.color.button_background_color_transparent'))
+        .onClick(() => this.showEditPanel = true)
       }
-      .width(40).height(40)
-      .backgroundColor($r('sys.color.button_background_color_transparent'))
-      .onClick(() => this.showEditPanel = true)
+      .width('100%')
+      .height(48)
+      .alignItems(VerticalAlign.Center)
+
+      // 选中历史日期：日期胶囊 + 清除按钮（P3 历史排行 UX）
+      if (rankVM.currentDate) {
+        Row({ space: 8 }) {
+          Button({ type: ButtonType.Capsule }) {
+            Row({ space: 4 }) {
+              SymbolGlyph($r('sys.symbol.calendar'))
+                .fontColor([Color.White])
+                .fontSize(16)
+              Text(rankVM.currentDate)
+                .fontSize(13)
+                .fontColor(Color.White)
+            }
+          }
+          .height(36)
+          .padding({ left: 12, right: 12 })
+          .backgroundColor(PixState.currentThemeColor)
+          .onClick(() => this.openDatePicker())
+
+          Button({ type: ButtonType.Circle }) {
+            SymbolGlyph($r('sys.symbol.xmark'))
+              .fontColor([$r('sys.color.font_primary')])
+              .fontSize(18)
+          }
+          .width(36).height(36)
+          .backgroundColor($r('sys.color.button_background_color_transparent'))
+          .onClick(() => rankVM.clearDate())
+        }
+        .width('100%')
+        .height(36)
+        .alignItems(VerticalAlign.Center)
+      }
     }
     .width('100%')
-    .height(56)
-    .padding({ left: 8, right: 8 })
-    .alignItems(VerticalAlign.Center)
+    .padding({ left: 8, right: 8, top: 4, bottom: 4 })
+    .alignItems(HorizontalAlign.Start)
+  }
+
+  // 历史排行日期选择：取消保留当前选择（回到最新用清除按钮）
+  private openDatePicker() {
+    _PixState.UIContext.showDatePickerDialog({
+      start: new Date(2000, 0, 1),
+      // Pixiv 榜单按 JST 发布滞后一天，未发布日期选了也只会得到空列表
+      end: rankVM.latestAvailableDate(),
+      selected: rankVM.pickerSelectedDate(),
+      showTime: false,
+      onDateAccept: (value: Date) => {
+        rankVM.changeDate(new Date(value))
+      },
+      onCancel: () => {
+        // 取消不改变当前日期
+      }
+    })
   }
 
   // 分段按钮点击：切换 Swiper 页
@@ -207,7 +260,7 @@ export struct Rank {
       Grid() {
         ForEach(rankVM.editingModes, (key: string, index?: number) => {
           GridItem() {
-            Text(FunctionConstants.ILLUST_RANK_MODES[key])
+            Text(this.rankModeLabels[key])
               .fontSize(14)
               .padding({ left: 12, right: 12, top: 8, bottom: 8 })
               .borderRadius(UIConstants.RADIUS_PILL)
@@ -244,7 +297,7 @@ export struct Rank {
 
   // 拖拽时跟随手指的半透明幽灵组件
   @Builder DragItemBuilder(key: string) {
-    Text(FunctionConstants.ILLUST_RANK_MODES[key])
+    Text(this.rankModeLabels[key])
       .fontSize(14)
       .padding({ left: 12, right: 12, top: 8, bottom: 8 })
       .borderRadius(UIConstants.RADIUS_PILL)

@@ -105,6 +105,7 @@ export class AppSettings {
       this.image_detail_quality = (json["image_detail_quality"] as string) ?? this.image_detail_quality;
       this.image_view_quality = (json["image_view_quality"] as string) ?? this.image_view_quality;
       this.rank_modes = (json["rank_modes"] as string[]) ?? this.rank_modes;
+      this.novel_rank_modes = (json["novel_rank_modes"] as string[]) ?? this.novel_rank_modes;
       this.file_name = (json["file_name"] as string) ?? this.file_name;
       this.share_text = (json["share_text"] as string) ?? this.share_text;
       this.show_ai_sign = (json["show_ai_sign"] as boolean) ?? this.show_ai_sign;
@@ -125,7 +126,7 @@ export class AppSettings {
     }
   }
 
-  @Monitor('swiper_browsing', 'show_thumbnail', 'rank_modes', 'novel_mode')
+  @Monitor('swiper_browsing', 'show_thumbnail', 'rank_modes', 'novel_rank_modes', 'novel_mode')
   public async save(): Promise<void> {
     try {
       const data: Record<string, Object> = {
@@ -134,6 +135,7 @@ export class AppSettings {
         "image_detail_quality": this.image_detail_quality,
         "image_view_quality": this.image_view_quality,
         "rank_modes": this.rank_modes,
+        "novel_rank_modes": this.novel_rank_modes,
         "file_name": this.file_name,
         "share_text": this.share_text,
         "show_ai_sign": this.show_ai_sign,
@@ -163,6 +165,7 @@ export class AppSettings {
       this.image_detail_quality = 'large';
       this.image_view_quality = 'original';
       this.rank_modes = []
+      this.novel_rank_modes = []
       this.file_name = FunctionConstants.DEFAULT_SAVE_FORMAT;
       this.share_text = FunctionConstants.DEFAULT_SHARE_FORMAT;
       this.show_ai_sign = true;

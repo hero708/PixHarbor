@@ -38,7 +38,7 @@ export class RankViewModel implements IIllustSwiperProvider {
   get activeTabs(): RankTab[] {
     // 根据模式选择对应的配置数组
     const modes = appSettings.novel_mode
-      ? (appSettings.novel_rank_modes || Object.keys(FunctionConstants.NOVEL_RANK_MODES))
+      ? this.novelModes
       : appSettings.rank_modes;
     return modes.map(key => {
       const tab = new RankTab();
@@ -51,7 +51,17 @@ export class RankViewModel implements IIllustSwiperProvider {
     });
   }
 
-  get isEmptyConfig(): boolean { return appSettings.rank_modes.length === 0; }
+  // 小说模式下 novel_rank_modes=[] 语义为"使用全部默认榜单"，不显示空配置引导
+  get isEmptyConfig(): boolean {
+    return appSettings.novel_mode ? false : appSettings.rank_modes.length === 0;
+  }
+
+  /** 小说榜单配置：空数组语义为"默认 5 个非 R18 榜单"（|| 对空数组不回退，必须显式长度判断） */
+  get novelModes(): string[] {
+    return appSettings.novel_rank_modes.length > 0
+      ? appSettings.novel_rank_modes
+      : FunctionConstants.NOVEL_RANK_DEFAULT_MODES;
+  }
 
   /** 当前模式对应的页面数据 */
   get currentData(): RankPageData {
@@ -87,7 +97,7 @@ export class RankViewModel implements IIllustSwiperProvider {
 
   private currentSignature(): string {
     const modes = appSettings.novel_mode
-      ? (appSettings.novel_rank_modes || Object.keys(FunctionConstants.NOVEL_RANK_MODES))
+      ? this.novelModes
       : appSettings.rank_modes;
     return `${appSettings.novel_mode ? 'novel' : 'illust'}|${this.currentDate}|${modes.join(',')}`;
   }
@@ -154,11 +164,20 @@ export class RankViewModel implements IIllustSwiperProvider {
     this.fetchRanking(this.currentMode);
   }
 
+  /** 日期选择器回显：当前选中的历史日期；未选日期时默认最新可用榜单日期 */
+  pickerSelectedDate(): Date {
+    if (this.currentDate) {
+      const parts = this.currentDate.split('-');
+      return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    }
+    return this.latestAvailableDate();
+  }
+
   /** 加载指定分类的排行榜数据 */
   async fetchRanking(mode?: string) {
     // 获取当前模式下的可用 modes (优先用用户自定义的，没有则用全量默认)
     const supportedModes = appSettings.novel_mode
-      ? (appSettings.novel_rank_modes || Object.keys(FunctionConstants.NOVEL_RANK_MODES))
+      ? this.novelModes
       : (appSettings.rank_modes || Object.keys(FunctionConstants.ILLUST_RANK_MODES));
 
     let targetMode = mode ?? this.currentMode;
@@ -235,11 +254,15 @@ export class RankViewModel implements IIllustSwiperProvider {
     }
   }
 
-  // 编辑面板逻辑
+  // 编辑面板逻辑（插画/小说模式各自维护榜单配置）
   openEditMode() {
-    const allAvailableKeys = Object.keys(FunctionConstants.ILLUST_RANK_MODES)
+    const modesTable = appSettings.novel_mode ? FunctionConstants.NOVEL_RANK_MODES : FunctionConstants.ILLUST_RANK_MODES;
+    const allAvailableKeys = Object.keys(modesTable)
       .filter(key => appSettings.show_H || !key.includes('r18'));
-    const currentSelectedKeys = appSettings.rank_modes.filter(key => allAvailableKeys.includes(key));
+    // 小说模式 novel_rank_modes=[] 表示默认榜单子集，打开面板时回显该子集（而非全选 10 项）
+    const configured = appSettings.novel_mode ? appSettings.novel_rank_modes : appSettings.rank_modes;
+    const base = (appSettings.novel_mode && configured.length === 0) ? this.novelModes : configured;
+    const currentSelectedKeys = base.filter(key => allAvailableKeys.includes(key));
     this.editingSelected = new Set(currentSelectedKeys);
     const unselectedKeys = allAvailableKeys.filter(key => !this.editingSelected.has(key));
     this.editingModes = [...currentSelectedKeys, ...unselectedKeys];
@@ -262,11 +285,19 @@ export class RankViewModel implements IIllustSwiperProvider {
   saveModes() {
     const finalModes = this.editingModes.filter(key => this.editingSelected.has(key));
     if (finalModes.length === 0) { toastUtil.showToast({ message: '至少选择一个项目' }); return; }
-    const isSame = finalModes.length === appSettings.rank_modes.length && finalModes.every((value, index) => value === appSettings.rank_modes[index]);
+    const novelMode = appSettings.novel_mode;
+    const current = novelMode ? appSettings.novel_rank_modes : appSettings.rank_modes;
+    const isSame = finalModes.length === current.length && finalModes.every((value, index) => value === current[index]);
     if (isSame) return;
-    appSettings.rank_modes = [...finalModes];
-    if (!appSettings.rank_modes.includes(this.currentMode)) {
-      this.currentMode = appSettings.rank_modes[0];
+    // @Monitor 监听 rank_modes/novel_rank_modes 变化自动持久化
+    if (novelMode) {
+      appSettings.novel_rank_modes = [...finalModes];
+    } else {
+      appSettings.rank_modes = [...finalModes];
+    }
+    const saved = novelMode ? appSettings.novel_rank_modes : appSettings.rank_modes;
+    if (!saved.includes(this.currentMode)) {
+      this.currentMode = saved[0];
       this.fetchRanking();
     }
     toastUtil.showToast({ message: '配置已保存' });
@@ -282,9 +313,8 @@ export class RankViewModel implements IIllustSwiperProvider {
     PixState.pageStack.pushPathByName('illust_detail', params, true);
   }
 
-  // 小说点击逻辑
+  // 小说点击回调（页面跳转由 NovelListView 内部完成，此处仅预留扩展）
   handleNovelClick(novel: PixivNovel) {
-    // TODO: 跳转小说详情
     logger.info(`[handleNovelClick] Clicked novel: ${novel.id}`);
   }
 

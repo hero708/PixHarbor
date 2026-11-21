@@ -24,18 +24,22 @@ export class FunctionConstants {
     'day_female_r18': 'XVIII 女性向',
   };
 
+  // 小说榜单标签与插画保持同风格短标签：分段按钮等宽分栏，长标签会被整体省略成"..."
   static NOVEL_RANK_MODES: Record<string, string> = {
     'day': '日榜',
     'week': '周榜',
-    'day_male': '男性向日榜',
-    'day_female': '女性向日榜',
-    'week_rookie': '新人周榜',
+    'day_male': '男性向',
+    'day_female': '女性向',
+    'week_rookie': '新人',
     'day_r18': 'XVIII 日榜',
-    'day_male_r18': 'XVIII 男性向日榜',
-    'day_female_r18': 'XVIII 女性向日榜',
+    'day_male_r18': 'XVIII 男性向',
+    'day_female_r18': 'XVIII 女性向',
     'week_r18': 'XVIII 周榜',
     'week_r18g': 'XVIII G 周榜',
   };
+
+  // 小说榜单默认页签（novel_rank_modes=[] 时的回退）：5 个非 R18 榜单，保证分段按钮标签可读
+  static NOVEL_RANK_DEFAULT_MODES: string[] = ['day', 'week', 'day_male', 'day_female', 'week_rookie'];
 
   // 默认文件名模板常量
   static DEFAULT_SAVE_FORMAT = '{illust_id}_p{part}_{title}_{user_name}'

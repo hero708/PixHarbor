@@ -28,9 +28,8 @@ struct UserSettings {
   // 落地页选项：小说模式下主页面签无排行榜，对应选项随之隐藏（索引值保持固定五页布局语义）
   private mainShowMenuOptions(): MenuOption[] {
     const options: MenuOption[] = [new MenuOption('0', $r('app.string.home'), $r('sys.symbol.house'))]
-    if (!appSettings.novel_mode) {
-      options.push(new MenuOption('1', $r('app.string.rank'), $r('sys.symbol.ranking_badge_bolt')))
-    }
+    // 小说模式下排行榜页签已放出（P3），启动页可选排行榜
+    options.push(new MenuOption('1', $r('app.string.rank'), $r('sys.symbol.ranking_badge_bolt')))
     options.push(
       new MenuOption('2', $r('app.string.trend'), $r('sys.symbol.picture_fill')),
       new MenuOption('3', $r('app.string.search'), $r('sys.symbol.curve_magnifyingglass')),

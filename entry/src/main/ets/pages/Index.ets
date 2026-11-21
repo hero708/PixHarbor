@@ -338,7 +338,7 @@ struct Index {
     }
   }
 
-  // main_show 存储的是固定五页布局下的索引，换算为当前页签列表的索引；目标页签不存在（小说模式下选了排行榜）时回退主页
+  // main_show 存储的是固定五页布局下的索引，换算为当前页签列表的索引；目标页签不存在时回退主页
   private initialTabIndex(): number {
     const idx = Number(UISettings.main_show)
     const name = (idx >= 0 && idx < TAB_ORDER.length) ? TAB_ORDER[idx] : 'home'
@@ -350,15 +350,13 @@ struct Index {
     const tabList: TabBuild[] = [
       { name: 'home', title: $r('app.string.home'), icon: $r('sys.symbol.house'), icon_fill: $r('sys.symbol.house_fill') }
     ]
-    // pixiv 源站无小说排行榜：小说模式下隐藏排行榜页签入口
-    if (!appSettings.novel_mode) {
-      tabList.push({
-        name: 'rank',
-        title: $r('app.string.rank'),
-        icon: $r('sys.symbol.ranking_badge_bolt'),
-        icon_fill: $r('sys.symbol.ranking_badge_bolt')
-      })
-    }
+    // 小说排行榜接口 /v1/novel/ranking 可用（上游曾隐藏入口，P3 放出）：两种模式均显示排行榜页签
+    tabList.push({
+      name: 'rank',
+      title: $r('app.string.rank'),
+      icon: $r('sys.symbol.ranking_badge_bolt'),
+      icon_fill: $r('sys.symbol.ranking_badge_bolt')
+    })
     tabList.push(
       // 小说模式下动态页展示小说热门内容，图标随之切换
       {
