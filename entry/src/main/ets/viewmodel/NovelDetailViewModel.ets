@@ -27,8 +27,22 @@ export class NovelDetailViewModel {
   // 存储解析出的系列导航信息
   @Trace seriesNavigation: SeriesNavigation | null = null;
 
-  @Trace fontSize: number = 18;
-  @Trace lineHeight: number = 1.8;
+  // 字号/行距改为全局偏好（UISettings 持久化）：跨作品、跨启动保持一致（P3-1）
+  get fontSize(): number {
+    return UISettings.reader_font_size;
+  }
+
+  set fontSize(v: number) {
+    UISettings.reader_font_size = v;
+  }
+
+  get lineHeight(): number {
+    return UISettings.reader_line_height;
+  }
+
+  set lineHeight(v: number) {
+    UISettings.reader_line_height = v;
+  }
 
   private novelId: number = 0;
 

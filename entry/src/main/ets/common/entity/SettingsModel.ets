@@ -13,6 +13,11 @@ export class _UISettings {
   @Trace main_show: string = '0'
   @Trace reading_color_mode: ReadingTheme = 'sepia'
   @Trace color_mode: ConfigurationConstant.ColorMode = ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET
+  // 阅读器全局偏好（P3-1：跨作品、跨启动持久化）
+  @Trace reader_font_size: number = 18
+  @Trace reader_line_height: number = 1.8
+  @Trace reader_auto_scroll: boolean = false
+  @Trace reader_auto_speed: number = 3 // 自动翻页速度 1-10
 
   constructor() {}
 
@@ -26,6 +31,10 @@ export class _UISettings {
       this.main_show = (json["main_show"] as string) ?? this.main_show;
       this.color_mode = (json["color_mode"] as number) ?? this.color_mode;
       this.reading_color_mode = (json["reading_color_mode"] as ReadingTheme) ?? this.reading_color_mode;
+      this.reader_font_size = (json["reader_font_size"] as number) ?? this.reader_font_size;
+      this.reader_line_height = (json["reader_line_height"] as number) ?? this.reader_line_height;
+      this.reader_auto_scroll = (json["reader_auto_scroll"] as boolean) ?? this.reader_auto_scroll;
+      this.reader_auto_speed = (json["reader_auto_speed"] as number) ?? this.reader_auto_speed;
 
       console.info("[UISettings] UI配置加载成功");
     } catch (e) {
@@ -33,14 +42,19 @@ export class _UISettings {
     }
   }
 
-  @Monitor('language', 'main_show', 'color_mode', 'reading_color_mode')
+  @Monitor('language', 'main_show', 'color_mode', 'reading_color_mode',
+    'reader_font_size', 'reader_line_height', 'reader_auto_scroll', 'reader_auto_speed')
   public async save(): Promise<void> {
     try {
       const data: Record<string, Object> = {
         "language": this.language,
         "main_show": this.main_show,
         "color_mode": this.color_mode,
-        "reading_color_mode": this.reading_color_mode
+        "reading_color_mode": this.reading_color_mode,
+        "reader_font_size": this.reader_font_size,
+        "reader_line_height": this.reader_line_height,
+        "reader_auto_scroll": this.reader_auto_scroll,
+        "reader_auto_speed": this.reader_auto_speed
       };
       const jsonStr: string = JSON.stringify(data);
       await preferenceUtil.put(AppConstants.KEY_UI_SETTINGS, jsonStr);
@@ -55,6 +69,10 @@ export class _UISettings {
       this.main_show = '0';
       this.color_mode = ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET;
       this.reading_color_mode = 'light'
+      this.reader_font_size = 18;
+      this.reader_line_height = 1.8;
+      this.reader_auto_scroll = false;
+      this.reader_auto_speed = 3;
       this.save();
       console.info("[UISettings] UI配置已恢复默认");
     } catch (error) {

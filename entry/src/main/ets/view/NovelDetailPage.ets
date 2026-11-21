@@ -17,6 +17,7 @@ import { toastUtil } from '../common/utils/ToastUtils';
 import { UISettings, appSettings } from '../common/entity/SettingsModel';
 import { tagCollectionVM } from '../viewmodel/TagCollectionVM';
 import { EmptyStateView } from '../components/CommonWidgets';
+import { readingProgress } from '../common/utils/ReadingProgressUtil';
 import { SymbolGlyphModifier } from '@kit.ArkUI';
 import { hdsEffect } from '@kit.UIDesignKit';
 
@@ -44,6 +45,20 @@ struct NovelDetail {
   private pageStack: NavPathStack = new NavPathStack();
   private htmlLoaded: boolean = false;
   private novelId: number = 0;
+  // 阅读进度记忆与自动翻页（P3-1）
+  @Local readPercent: number = 0;
+  @Local savedPercent: number = 0;
+  @Local autoActive: boolean = false;
+  private readerScroller: Scroller = new Scroller();
+  private contentHeight: number = 0;
+  private viewportHeight: number = 0;
+  private pendingRestoreRatio: number = -1;
+  private autoTimer: number = -1;
+
+  aboutToDisappear() {
+    this.stopAutoScroll();
+    this.saveProgress();
+  }
 
   build() {
     Stack() {
@@ -61,6 +76,9 @@ struct NovelDetail {
               this.vm = new NovelDetailViewModel(this.novelId);
               this.vm.fetchDetail();
               this.vm.fetchNovelContent();
+              readingProgress.getRatio(this.novelId).then((r: number) => {
+                this.savedPercent = Math.round(r * 100);
+              });
             } catch (e) {
               logger.error('[onReady] Init Error:', e);
             }
@@ -68,8 +86,7 @@ struct NovelDetail {
         },
         onBackPressed: () => {
           if (this.isReadingMode) {
-            this.isReadingMode = false;
-            this.htmlLoaded = false;
+            this.exitReadingMode();
             return true;
           }
           return false;
@@ -79,7 +96,7 @@ struct NovelDetail {
         }
       })
         .bindSheet(this.showReadingSettings!!, this.ReadingSettingsPanel(), {
-          height: '50%',
+          height: '60%',
           dragBar: true,
         })
     }
@@ -487,7 +504,7 @@ struct NovelDetail {
         .maxLines(6)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .width('100%')
-      Button($r('app.string.start_reading'))
+      Button(this.savedPercent > 0 ? `继续阅读 · ${this.savedPercent}%` : $r('app.string.start_reading'))
         .width('100%')
         .height(48)
         .fontSize(17)
@@ -498,6 +515,19 @@ struct NovelDetail {
         .onClick(() => {
           this.enterReadingMode()
         })
+      if (this.savedPercent > 0) {
+        Text('从头阅读')
+          .fontSize(13)
+          .fontColor($r('sys.color.font_tertiary'))
+          .width('100%')
+          .textAlign(TextAlign.Center)
+          .onClick(() => {
+            readingProgress.clearRatio(this.novelId);
+            this.savedPercent = 0;
+            this.pendingRestoreRatio = -1;
+            this.enterReadingMode();
+          })
+      }
     }.width('100%').padding({ top: 8 })
   }
   // 下载 + 收藏悬浮控制
@@ -563,6 +593,15 @@ struct NovelDetail {
   @Builder
   ReadingMode() {
     Stack() {
+      // 阅读进度条：顶部常驻 2vp，随滚动实时更新
+      Progress({ value: this.readPercent, total: 100, type: ProgressType.Linear })
+        .width('100%')
+        .height(2)
+        .color(PixState.currentThemeColor)
+        .backgroundColor(ColorUtils.getColorWithAlphaString(getThemeConfig(UISettings.reading_color_mode).text, 12))
+        // 状态栏下方常驻，避免被系统状态栏遮挡
+        .position({ x: 0, y: PixState.topRectHeight })
+        .zIndex(11)
       if (this.vm!.isTextLoading) {
         this.LoadingView($r('app.string.content_loading'))
       } else if (this.vm!.readingMode === 'webview') {
@@ -625,11 +664,21 @@ struct NovelDetail {
       .onControllerAttached(() => {
         this.loadWebContent();
       })
+      .onPageEnd(() => {
+        // web 阅读器进度恢复（best-effort）
+        if (this.pendingRestoreRatio >= 0) {
+          const r: number = this.pendingRestoreRatio;
+          this.pendingRestoreRatio = -1;
+          this.webController.runJavaScript(`window.scrollTo(0,${r}*(document.body.scrollHeight-window.innerHeight))`)
+            .catch(() => {
+            });
+        }
+      })
   }
   // 原生阅读器
   @Builder
   NativeReader() {
-    Scroll() {
+    Scroll(this.readerScroller) {
       Column() {
         // 顶部留白
         Blank().height(this.showReadingBars ? (PixState.topRectHeight + 52) : PixState.topRectHeight)
@@ -651,10 +700,30 @@ struct NovelDetail {
         Blank().height(this.calculateBottomPadding())
       }
       .width('100%')
+      .onAreaChange((_old: Area, now: Area) => {
+        this.contentHeight = now.height as number;
+        this.tryRestoreProgress();
+      })
     }
     .scrollBar(BarState.Off)
     .edgeEffect(EdgeEffect.Spring)
     .backgroundColor(Color.Transparent)
+    .onAreaChange((_old: Area, now: Area) => {
+      this.viewportHeight = now.height as number;
+      this.tryRestoreProgress();
+    })
+    .onDidScroll(() => {
+      this.updateReadPercent();
+    })
+    .onScrollStop(() => {
+      this.saveProgress();
+    })
+    .onTouch((e: TouchEvent) => {
+      // 手动触摸即暂停自动翻页（设置保留，可在面板重新开启）
+      if (e.type === TouchType.Down && this.autoActive) {
+        this.stopAutoScroll();
+      }
+    })
   }
   // 阅读顶栏
   @Builder
@@ -668,8 +737,7 @@ struct NovelDetail {
         }.width(40).height(40)
         .backgroundColor($r('sys.color.button_background_color_transparent'))
         .onClick(() => {
-          this.isReadingMode = false;
-          this.htmlLoaded = false;
+          this.exitReadingMode();
         })
 
         Blank()
@@ -712,13 +780,8 @@ struct NovelDetail {
     .padding({ top: PixState.topRectHeight })
     .position({ x: 0, y: 0 })
     .zIndex(10)
-    .linearGradient({
-      direction: GradientDirection.Bottom,
-      colors: [
-        [ColorUtils.getColorWithAlphaString(getThemeConfig(UISettings.reading_color_mode).bg, 90), 0.0],
-        [ColorUtils.getColorWithAlphaString(getThemeConfig(UISettings.reading_color_mode).bg, 0), 1.0]
-      ]
-    })
+    // 实色背景：上游渐隐遮罩在真机上滚动时正文透字，改为不透明底保证 readability
+    .backgroundColor(getThemeConfig(UISettings.reading_color_mode).bg)
     .transition(TransitionEffect.OPACITY)
   }
   // 阅读底栏
@@ -845,6 +908,46 @@ struct NovelDetail {
           this.ThemeButton('dark', '夜间', '#1A1A2E', '#E0E0E0', $r('sys.symbol.moon'))
         }
       }
+
+      // 自动翻页（P3-1）：开关 + 速度；手动触摸正文即暂停
+      Column({ space: 12 }) {
+        Row() {
+          Text('自动翻页').fontSize(15).fontColor($r('sys.color.font_secondary')).layoutWeight(1)
+          Toggle({ type: ToggleType.Switch, isOn: this.autoActive })
+            .selectedColor(PixState.currentThemeColor)
+            .onChange((on: boolean) => {
+              UISettings.reader_auto_scroll = on;
+              if (on) {
+                this.startAutoScroll();
+              } else {
+                this.stopAutoScroll();
+              }
+            })
+        }.width('100%')
+
+        if (this.autoActive) {
+          Row({ space: 16 }) {
+            Text('慢').fontSize(13).fontColor($r('sys.color.font_tertiary'))
+            Slider({
+              value: UISettings.reader_auto_speed,
+              min: 1,
+              max: 10,
+              step: 1,
+              style: SliderStyle.InSet
+            })
+              .layoutWeight(1)
+              .trackColor($r('sys.color.ohos_id_color_hover'))
+              .selectedColor(PixState.currentThemeColor)
+              .onChange((value: number) => {
+                UISettings.reader_auto_speed = Math.round(value);
+                if (this.autoActive) {
+                  this.startAutoScroll();
+                }
+              })
+            Text('快').fontSize(13).fontColor($r('sys.color.font_tertiary'))
+          }.width('100%')
+        }
+      }
     }.padding(24).width('100%')
   }
   // 主题按钮
@@ -903,6 +1006,104 @@ struct NovelDetail {
     if (!this.vm.hasTextLoaded) {
       await this.vm.fetchNovelContent();
     }
+    // 进度记忆：按比例恢复上次阅读位置；自动翻页跟随全局偏好
+    const ratio: number = await readingProgress.getRatio(this.novelId);
+    this.pendingRestoreRatio = ratio > 0.01 ? ratio : -1;
+    this.readPercent = ratio > 0.01 ? Math.round(ratio * 100) : 0;
+    if (UISettings.reader_auto_scroll) {
+      this.startAutoScroll();
+    }
+  }
+
+  // 退出阅读模式：停自动翻页并落盘进度
+  private exitReadingMode() {
+    this.stopAutoScroll();
+    if (this.vm?.readingMode === 'webview') {
+      this.webController.runJavaScript('(window.scrollY/((document.body.scrollHeight-window.innerHeight)||1))')
+        .then((v: string) => {
+          readingProgress.saveRatio(this.novelId, Number(v));
+        })
+        .catch(() => {
+        });
+    } else {
+      this.saveProgress();
+    }
+    this.isReadingMode = false;
+    this.htmlLoaded = false;
+  }
+
+  // ===== 阅读进度记忆 & 自动翻页（P3-1） =====
+  private scrollMax(): number {
+    return Math.max(0, this.contentHeight - this.viewportHeight);
+  }
+
+  private updateReadPercent() {
+    const max: number = this.scrollMax();
+    if (max <= 0) {
+      return;
+    }
+    const offset: number = this.readerScroller.currentOffset().yOffset;
+    const p: number = Math.min(100, Math.max(0, Math.round(offset / max * 100)));
+    if (p !== this.readPercent) {
+      this.readPercent = p;
+    }
+  }
+
+  private saveProgress() {
+    if (!this.isReadingMode || this.scrollMax() <= 0) {
+      return;
+    }
+    const ratio: number = this.readerScroller.currentOffset().yOffset / this.scrollMax();
+    readingProgress.saveRatio(this.novelId, ratio);
+    this.savedPercent = Math.round(Math.min(1, Math.max(0, ratio)) * 100);
+  }
+
+  private tryRestoreProgress() {
+    if (this.pendingRestoreRatio < 0 || this.scrollMax() <= 0) {
+      return;
+    }
+    const ratio: number = this.pendingRestoreRatio;
+    this.pendingRestoreRatio = -1;
+    this.readerScroller.scrollTo({ xOffset: 0, yOffset: ratio * this.scrollMax() });
+    this.updateReadPercent();
+  }
+
+  private startAutoScroll() {
+    this.stopAutoScroll();
+    this.autoActive = true;
+    const pxPerSec: number = 20 + UISettings.reader_auto_speed * 15;
+    const delta: number = pxPerSec * 0.05;
+    this.autoTimer = setInterval(() => {
+      if (!this.isReadingMode) {
+        this.stopAutoScroll();
+        return;
+      }
+      if (this.vm?.readingMode === 'webview') {
+        this.webController.runJavaScript(`window.scrollBy(0,${delta})`).catch(() => {
+        });
+        return;
+      }
+      const max: number = this.scrollMax();
+      if (max <= 0) {
+        return;
+      }
+      if (this.readerScroller.currentOffset().yOffset >= max - 1) {
+        this.stopAutoScroll();
+        toastUtil.showToast({ message: '已到结尾，自动翻页停止' });
+        return;
+      }
+      this.readerScroller.scrollBy(0, delta);
+      // 自动翻页期间周期落盘（util 内部 400ms 防抖），进程被杀也不丢进度
+      this.saveProgress();
+    }, 50);
+  }
+
+  private stopAutoScroll() {
+    if (this.autoTimer !== -1) {
+      clearInterval(this.autoTimer);
+      this.autoTimer = -1;
+    }
+    this.autoActive = false;
   }
 
   // 加载web文本
@@ -949,10 +1150,25 @@ struct NovelDetail {
     if (!novel) return;
     if (!novel.viewable) return; // 不可阅读的直接拦截
 
+    this.stopAutoScroll();
+    this.saveProgress();
     this.htmlLoaded = false;
+    this.novelId = novel.id;
+    this.readPercent = 0;
+    this.pendingRestoreRatio = -1;
     this.vm = new NovelDetailViewModel(novel.id);
     this.vm.fetchDetail();
     this.vm.fetchNovelContent();
+    readingProgress.getRatio(novel.id).then((r: number) => {
+      this.savedPercent = Math.round(r * 100);
+      if (r > 0.01) {
+        this.pendingRestoreRatio = r;
+        this.tryRestoreProgress();
+      }
+    });
+    if (UISettings.reader_auto_scroll) {
+      this.startAutoScroll();
+    }
   }
 
 }

@@ -6,7 +6,7 @@ import { WaterFlowColumnsTemplate } from "../../common/utils/breakpoint/BreakPoi
 import { PixivImageComponent } from "../../components/PixivImage"
 import IllustHistoryInfo from "../../common/entity/IllustHistoryInfo"
 import NovelHistoryInfo from "../../common/entity/NovelHistoryInfo"
-import { DetailPageParams } from "../../common/entity/DetailEntity"
+import { DetailPageParams, NovelDetailParams } from "../../common/entity/DetailEntity"
 import { toastUtil } from "../../common/utils/ToastUtils"
 import { appSettings } from "../../common/entity/SettingsModel"
 import { ResourceUtils } from "../../common/utils/ResourceUtil"
@@ -205,8 +205,9 @@ struct PixHistory {
   // 跳转小说详情
   private async openNovel(novelId: number) {
     if (!novelId) return;
-
-    this.pageStack.pushPathByName('novel_detail', null, true);
+    // 上游此处曾 push null 参数，导致详情页拿不到 id 永久转圈；补传 id（P3-1 修复）
+    const params: NovelDetailParams = { id: novelId };
+    this.pageStack.pushPathByName('novel_detail', params, true);
   }
 
 }

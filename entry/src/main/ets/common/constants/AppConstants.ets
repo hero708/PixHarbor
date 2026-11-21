@@ -7,6 +7,8 @@ export class AppConstants {
   static readonly KEY_UI_SETTINGS: string = 'interface_settings_json'
   // 直连模式各主机探测胜出 IP 的持久化键名
   static readonly KEY_DIRECT_WINNERS: string = 'direct_host_winners_json'
+  // 小说阅读进度记忆（novelId → 滚动比例）持久化键名
+  static readonly KEY_NOVEL_READ_PROGRESS: string = 'novel_read_progress_json'
   // 注册链接
   static readonly REGISTER_URL: string = 'https://accounts.pixiv.net/signup'
   // 请求头 Referer 值
