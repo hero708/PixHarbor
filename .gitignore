@@ -42,5 +42,6 @@ desktop.ini
 /tools/icon-gen/*.png
 # 换牌前原图标备份
 *.orig
+/tools/icon-gen/orig-backups/
 # Python 缓存
 __pycache__/

@@ -257,7 +257,15 @@ git checkout -b master FETCH_HEAD
 - **图标资源落位**：AppScope 与 entry 的分层 base=8 拆分（background 全幅渐变 + foreground 透明安全区，桌面固定不随明暗变）；entry base 的 `app_icon/app_icon_round/startIcon`=9、entry **dark** 同名=8（splash `FOLLOW_SYSTEM`、Index/Login/About logo 自动明暗切换）；`assets/app_icon.png`(8)/`app_icon_light.png`(9) 供 README；原图标备份 `*.orig`（已忽略）；生成/应用脚本在 `tools/icon-gen/`。
 - **.gitignore**：解除 `/docs/`、`/NOTICE.md` 忽略；新增 `/reference/`、`/tools/icon-gen/*.png`、`*.orig`、`__pycache__/`。
 - **残留扫描**：功能性标识零 `pixlume` 残留；剩余命中均为上游归属（CHANGELOG 上游历史、README/NOTICE 致谢、关于页致谢条目），符合 GPL 合规要求。
-- **待 P0 验收**：bundleName 已变更 → DevEco 需重新生成自动签名并 Run；设备上确认名称 PixHarbor、桌面蓝色叠影 P 图标、应用内明暗切换效果。
+- **待 P0 验收**：~~DevEco 重新自动签名~~（用户已完成）→ 已 CLI 构建安装（见下），剩余功能验收由用户在真机核对：名称 PixHarbor、桌面蓝色叠影 P 图标、应用内明暗切换、登录/推荐流/搜索/网络矩阵（§5.4）。
+
+**P0 构建与安装记录（2026-11-21，CLI 完成）**：
+
+- **工具链**：node=`D:\App\DevEco Studio\tools\node`、ohpm=`tools\ohpm\bin\ohpm.bat`、hvigorw=`tools\hvigor\bin\hvigorw.bat`、java=`D:\App\DevEco Studio\jbr`（openjdk 25.0.2）、hdc=`sdk\default\openharmony\toolchains\hdc.exe`。
+- **配方**：`NODE_HOME`/`DEVECO_SDK_HOME=D:\App\DevEco Studio\sdk`/`JAVA_HOME=jbr` + PATH 前置 → `ohpm.bat install --all` → `hvigorw.bat assembleHap --mode module -p product=default -p buildMode=debug --no-daemon`。
+- **排障**：①资源目录内 `*.orig` 备份触发 `11211116 Invalid resource name` → 移至 `tools/icon-gen/orig-backups/`；②hvigor workspace 缓存 ENOENT → 删除重建；③`spawn java ENOENT` → 设 `JAVA_HOME`；④出 unsigned.hap / 安装报 `9568320 no signature file` → `build-profile.json5` products[0] 补 `"signingConfig": "default"`（signingConfigs 已存在但 product 未引用）。
+- **结果**：`entry-default-signed.hap` → `hdc -t 5MT0225C11020636 install` 成功 → `aa start -a EntryAbility -b com.prixiv.view` 启动成功（Mate 80 Pro Max）。构建警告均为上游遗留 ArkTS WARN（deprecated API / syscap tv·car / Function may throw），不阻塞。
+- **注意**：构建/安装需提权（hvigor 用户目录缓存、签名材料、hdc 命名管道）；后续迭代同配方重跑即可。
 
 ### P2：性能优化（2~4 天，推荐做，是你选方案3的核心收益）
 
