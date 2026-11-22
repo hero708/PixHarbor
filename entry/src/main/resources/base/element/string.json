@@ -637,6 +637,22 @@
       "value": "功能"
     },
     {
+      "name": "discover",
+      "value": "发现"
+    },
+    {
+      "name": "discover_entry",
+      "value": "随便看看"
+    },
+    {
+      "name": "discover_random",
+      "value": "随便看看"
+    },
+    {
+      "name": "discover_latest",
+      "value": "全站最新"
+    },
+    {
       "name": "bookmarked",
       "value": "已收藏 %s"
     },

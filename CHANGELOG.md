@@ -3,6 +3,12 @@
 > **PixHarbor fork 说明**：本仓库基于上游 [SYTKILLER/PixLume](https://github.com/SYTKILLER/PixLume) v1.2.0（commit ae6d6a3）二次开发。
 > 1.2.0 及以下的日志为上游 PixLume 历史，保留作致谢与溯源；PixHarbor 自身版本自 0.1.0 起记。
 
+## [0.3.3] - 2026-11-22（PixHarbor）
+
+### 新增功能
+
+- 随便看看（发现页）：「更多 → 功能 → 随便看看」新增全屏发现页，双 tab 左右滑动切换——「随便看看」对接官方优质发现流（`/v1/walkthrough/illusts`），客户端洗牌呈现随机排列、下拉即换一批；「全站最新」对接大家的新作（`/v1/illust/new`），按时间序无限滚动。复用瀑布流组件（含 0.3.2 卡片预留高度），支持触底预加载、增量追加不回跳、详情页滑动联动（`DiscoverPage` / `DiscoverViewModel`，新增 API `getNewIllusts`）
+
 ## [0.3.2] - 2026-11-22（PixHarbor）
 
 ### 问题修复

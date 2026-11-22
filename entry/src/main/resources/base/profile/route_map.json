@@ -114,6 +114,11 @@
       "name": "follow",
       "pageSourceFile": "src/main/ets/view/more/FollowPage.ets",
       "buildFunction": "FollowPageBuilder"
+    },
+    {
+      "name": "discover",
+      "pageSourceFile": "src/main/ets/view/more/DiscoverPage.ets",
+      "buildFunction": "DiscoverPageBuilder"
     }
   ]
 }

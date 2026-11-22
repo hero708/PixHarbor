@@ -104,6 +104,17 @@ export struct More {
       }),
       // 功能
       new CustomItemInfo({ id: 'function', title: $r('app.string.function'), type: ItemActionType.GROUP }),
+      // 随便看看（发现：随机优质 + 全站最新）
+      new CustomItemInfo({
+        symbol: $r('sys.symbol.eye'),
+        iconBg: '#5856D6',
+        title: $r('app.string.discover_entry'),
+        type: ItemActionType.ROUTER_BLANK,
+        id: 'discover',
+        onChange: () => {
+          this.pushTo('discover')
+        }
+      }),
       // 小说
       new CustomItemInfo({
         symbol: !appSettings.novel_mode ? $r('sys.symbol.list_book') : $r('sys.symbol.bookmark_picture'),

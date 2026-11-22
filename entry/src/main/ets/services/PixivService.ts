@@ -270,9 +270,14 @@ export class PixivService {
     return this.data.getIllustBookmarkDetail(illust_id);
   }
 
-  /** 获取新手引导插画 */
-  async walkthroughIllusts(): Promise<PixivListResult> {
-    return this.data.walkthroughIllusts();
+  /** 获取新手引导插画（随便看看：随机优质发现流） */
+  async walkthroughIllusts(nextUrl?: string): Promise<PixivListResult> {
+    return this.data.walkthroughIllusts(nextUrl);
+  }
+
+  /** 获取大家的新作（全站最新） */
+  async getNewIllusts(contentType: 'illust' | 'manga' = 'illust', nextUrl?: string): Promise<PixivListResult> {
+    return this.data.getNewIllusts(contentType, nextUrl);
   }
 
   /**

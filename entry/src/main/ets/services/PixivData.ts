@@ -253,10 +253,22 @@ export class PixivData {
   }
 
   /**
-   * walkthrough 插画
+   * walkthrough 插画（随便看看：官方随机优质发现流）
    */
-  async walkthroughIllusts(): Promise<PixivListResult> {
-    return this.fetchListWithFilter('/v1/walkthrough/illusts', undefined, undefined, 'illusts');
+  async walkthroughIllusts(nextUrl?: string): Promise<PixivListResult> {
+    return this.fetchListWithFilter('/v1/walkthrough/illusts', undefined, nextUrl, 'illusts');
+  }
+
+  /**
+   * 大家的新作（全站最新）：/v1/illust/new，按 max_illust_id 翻页（next_url 携带）
+   * content_type: illust（插画）/ manga（漫画）
+   */
+  async getNewIllusts(
+    contentType: 'illust' | 'manga' = 'illust',
+    nextUrl?: string
+  ): Promise<PixivListResult> {
+    const params = { content_type: contentType, filter: 'for_android' };
+    return this.fetchListWithFilter('/v1/illust/new', params, nextUrl, 'illusts');
   }
 
   /**
