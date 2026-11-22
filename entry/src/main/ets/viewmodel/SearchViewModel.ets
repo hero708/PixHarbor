@@ -304,11 +304,14 @@ export class SearchViewModel implements IIllustSwiperProvider {
     // 翻页结果同样需要本地兜底过滤（服务端可能忽略收藏数参数）与人气页内排序
     const popular = this.filterSort === 'popular_desc' && this.searchType !== 'user';
     const minBookmark = this.effectiveMinBookmark();
-    // 本地过滤可能把整页滤空，此时自动续拉下一页（最多连续 5 页）
-    const MAX_EMPTY_PAGES = 5;
+    // 人气模式的收藏门槛会把整页滤得只剩零星几条：单次加载更多需累积到约一屏的新内容，
+    // 否则每次触底只追加一行，失去瀑布流"成批涌现"的手感（最多续拉 MAX_LOAD_PAGES 页约束网络开销）
+    const MAX_LOAD_PAGES = 8;
+    const MIN_NEW_ITEMS = 16;
     try {
       let url: string | undefined = nextUrl;
-      for (let page = 0; page < MAX_EMPTY_PAGES && url; page++) {
+      let totalAdded = 0;
+      for (let page = 0; page < MAX_LOAD_PAGES && url; page++) {
         const pageUrl: string = url;
         let appended = 0;
         if (this.searchType === 'illust') {
@@ -319,7 +322,10 @@ export class SearchViewModel implements IIllustSwiperProvider {
           const unique = list.filter(i => !existingIds.has(i.id));
           appended = unique.length;
           // 替换引用（而非原地 push）：WaterFlowView 的 @Monitor('illustList') 依赖引用变化同步 LazyForEach 数据源
-          this.resultIllusts = [...this.resultIllusts, ...unique];
+          // 仅在确有新条目时重赋，避免同长度重赋触发整表 reload（会回跳滚动）
+          if (unique.length > 0) {
+            this.resultIllusts = [...this.resultIllusts, ...unique];
+          }
           url = data.next_url || undefined;
           this.IllustNextUrl = url || '';
         } else if (this.searchType === 'novel') {
@@ -338,8 +344,14 @@ export class SearchViewModel implements IIllustSwiperProvider {
           url = data.next_url || undefined;
           this.userNextUrl = url || '';
         }
-        // 有结果（或画师模式/无过滤）即停止续拉
-        if (appended > 0 || minBookmark === 0) break;
+        totalAdded += appended;
+        if (this.searchType === 'illust') {
+          // 无过滤时单页即足量；有过滤时累积到约一屏再返回，恢复"爆瀑流"手感
+          if (minBookmark === 0 || totalAdded >= MIN_NEW_ITEMS) break;
+        } else {
+          // 小说/画师保持原有"首个非空页即停"行为
+          if (appended > 0 || minBookmark === 0) break;
+        }
       }
     } catch (e) {
       logger.error(`[加载更多失败] 错误详情: ${JSON.stringify(e)}`);

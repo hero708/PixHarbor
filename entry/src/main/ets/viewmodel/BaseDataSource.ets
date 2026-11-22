@@ -12,6 +12,21 @@ export class BaseDataSource<T> implements IDataSource {
     this.notifyDataReload();
   }
 
+  /**
+   * 尾部追加：逐项 notifyDataAdd，LazyForEach 仅创建新增卡片、保留滚动位置。
+   * 翻页加载严禁走 resetDataset（onDataReloaded 会重建布局并回跳滚动位置）。
+   */
+  public appendDataset(items: T[]) {
+    if (items.length === 0) {
+      return;
+    }
+    const start = this.dataset.length;
+    this.dataset = this.dataset.concat(items);
+    for (let i = 0; i < items.length; i++) {
+      this.notifyDataAdd(start + i);
+    }
+  }
+
   public updateDataAt(index: number, data: T) {
     if (index >= 0 && index < this.dataset.length) {
       this.dataset[index] = data;

@@ -44,10 +44,28 @@ export struct WaterFlowView {
   }
 
   // 各 ViewModel 均以「替换数组引用」方式更新列表（含加载更多），引用变化即同步数据源；
-  // LazyForEach 按稳定 id key 复用已有卡片，仅创建新增项
+  // 尾部追加（前缀 id 不变）走增量 notifyDataAdd：保留滚动位置，消除翻页后回跳/卡顿；
+  // 其余情况（新搜索/刷新/删改）才全量 reload
   @Monitor('illustList')
   onIllustListChange() {
-    this.dataSource.resetDataset(this.illustList)
+    const old = this.dataSource.getDataset()
+    const next = this.illustList
+    if (next.length > old.length && this.isPrefixById(old, next)) {
+      logger.info(`list sync old=${old.length} new=${next.length} path=append`)
+      this.dataSource.appendDataset(next.slice(old.length))
+    } else {
+      logger.info(`list sync old=${old.length} new=${next.length} path=reload`)
+      this.dataSource.resetDataset(next)
+    }
+  }
+
+  private isPrefixById(old: PixivIllust[], next: PixivIllust[]): boolean {
+    for (let i = 0; i < old.length; i++) {
+      if (old[i].id !== next[i].id) {
+        return false
+      }
+    }
+    return true
   }
 
   build() {
@@ -60,7 +78,11 @@ export struct WaterFlowView {
               showAISign: isAIIllust(illust),
               showGifSign: isUgoiraIllust(illust),
               imageUrl: ImageUtils.getImageUrlByQuality(illust.image_urls, appSettings.image_preview_quality),
-              imageObjectFit: ImageFit.Auto,
+              // 按作品真实宽高比预留卡片高度：占位符即占满最终尺寸，图片到位后零重排；
+              // 整屏卡片立即成型，快速滑动不再因未加载图片塌缩而"一次只出两三张"
+              imageAspectRatio: illust.width > 0 && illust.height > 0 ? illust.width / illust.height : 1,
+              imageWidth: '100%',
+              imageObjectFit: ImageFit.Cover,
               imageBorder: { radius: 16 },
             })
               .id(CardUtil.getFlowItemIdByIndex(illust.id))

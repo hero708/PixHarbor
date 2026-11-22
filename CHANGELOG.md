@@ -3,6 +3,19 @@
 > **PixHarbor fork 说明**：本仓库基于上游 [SYTKILLER/PixLume](https://github.com/SYTKILLER/PixLume) v1.2.0（commit ae6d6a3）二次开发。
 > 1.2.0 及以下的日志为上游 PixLume 历史，保留作致谢与溯源；PixHarbor 自身版本自 0.1.0 起记。
 
+## [0.3.2] - 2026-11-22（PixHarbor）
+
+### 问题修复
+
+- 修复瀑布流"快速滑动一次只出两三张图、占位符不显示、图片加载后界面重排"：卡片此前未传宽高比（`ImageFit.Auto` 高度依赖已加载图片），未加载卡片塌缩、占位符尺寸与真图不符。现按作品真实 `width/height` 预留卡片高度（`WaterFlowView` 传 `imageAspectRatio` + 宽度 100%），占位符即占满最终尺寸、整屏卡片立即成型、图片到位零重排。影响全部瀑布流
+- 修复搜索页加载更多"一次只追加一行"、无成批涌现感：人气排序默认 ≥500 收藏本地过滤使每页仅剩零星几条，且原循环首个非空页即停。现单次加载更多累积到约一屏新内容再返回（最多续拉 8 页，`SearchViewModel.loadMoreSearchResult`）；并仅在确有新条目时重赋列表，避免整页滤空时同长度重赋触发整表 reload 回跳。0.3.1 改增量追加后旧 reload 的"连环拉取"掩盖消失，此问题随之暴露，本次一并补齐
+
+## [0.3.1] - 2026-11-22（PixHarbor）
+
+### 问题修复
+
+- 修复瀑布流翻页加载后页面向上回跳的卡顿感：追加下一页改走增量通知 `notifyDataAdd`（`BaseDataSource.appendDataset`），LazyForEach 仅创建新增卡片、保留滚动位置；仅新搜索/刷新/删改才全量 reload（`WaterFlowView` 按前缀 id 判定追加）。影响搜索/首页/排行/动态/收藏/作者页全部瀑布流
+
 ## [0.3.0] - 2026-11-21（PixHarbor）
 
 ### 新增功能
